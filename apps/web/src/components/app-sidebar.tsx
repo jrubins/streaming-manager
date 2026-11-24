@@ -14,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useSidebar } from '@/components/ui/sidebar-context';
 import type { SessionUser } from '@/lib/session';
 
 export interface AppSidebarProps {
@@ -50,11 +51,16 @@ export function AppSidebar({
     '/services': activeServiceCount,
   };
   const displayName = user ? (user.name ?? user.email ?? user.id) : null;
+  // On a phone the sidebar is a sheet over the page: close it once a page is chosen.
+  const { isMobile, setOpenMobile } = useSidebar();
+  const closeOnMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="px-4 pt-5 pb-4">
-        <Link to="/" className="flex items-center gap-3">
+        <Link to="/" onClick={closeOnMobile} className="flex items-center gap-3">
           <BrandMark className="size-9" />
           <span className="min-w-0">
             <span className="block font-semibold tracking-tight text-sidebar-accent-foreground">
@@ -81,6 +87,7 @@ export function AppSidebar({
                     <SidebarMenuButton asChild size="lg" className="h-10">
                       <Link
                         to={to}
+                        onClick={closeOnMobile}
                         activeOptions={{ exact: to === '/' }}
                         className="data-[status=active]:bg-sidebar-accent data-[status=active]:font-medium data-[status=active]:text-sidebar-accent-foreground [&.active_svg]:text-sidebar-primary"
                       >

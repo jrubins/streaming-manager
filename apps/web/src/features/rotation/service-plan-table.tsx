@@ -178,6 +178,70 @@ function ServiceRowMenu({
   );
 }
 
+/** One subscription in the plan, as a card: the phone layout of a table row. */
+function PlanCard({
+  row,
+  providerName,
+  onDone,
+  pending,
+}: {
+  row: ServicePlanRow;
+  providerName: (key: string) => string;
+  onDone: ((row: ServicePlanRow) => void) | undefined;
+  pending: boolean;
+}) {
+  const { offering, state } = row;
+  const { label, tone, icon: Icon } = KINDS[kindOf(row)];
+  return (
+    <li
+      aria-label={offering.name}
+      className={cn('surface space-y-3 p-4', state === 'paused' && 'bg-muted/40 shadow-none')}
+    >
+      <div className="flex items-start gap-3">
+        <ServiceLogo
+          service={offering}
+          className={cn('size-10 rounded-xl', state === 'paused' && 'opacity-60 grayscale')}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">{offering.name}</p>
+          <p className="text-xs text-muted-foreground">
+            <PlanLine row={row} />
+          </p>
+          {offering.kind === 'bundle' ? (
+            <p className="text-xs text-muted-foreground">
+              Includes {formatList(offering.includes.map(providerName))}
+            </p>
+          ) : null}
+        </div>
+        <p className="text-right whitespace-nowrap">
+          <Price row={row} />
+        </p>
+      </div>
+      <div>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
+            tone,
+          )}
+        >
+          <Icon className="size-3.5" aria-hidden />
+          {label}
+        </span>
+        <p className="mt-1.5 text-xs text-muted-foreground">{explain(row)}</p>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <ServiceTitles
+          serviceName={offering.name}
+          includes={offering.includes}
+          shows={row.shows}
+          providerName={providerName}
+        />
+        <ServiceRowMenu row={row} onDone={onDone} pending={pending} />
+      </div>
+    </li>
+  );
+}
+
 /** The month's plan for every subscription: what to do with it, why, and what it costs. */
 export function ServicePlanTable({
   rows,
@@ -187,105 +251,125 @@ export function ServicePlanTable({
   pending = false,
 }: ServicePlanTableProps) {
   return (
-    <div className="surface overflow-x-auto">
-      <table className="w-full min-w-[760px] text-sm">
-        <thead>
-          <tr className="border-b text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <th scope="col" className="py-3 pr-4 pl-5 font-medium">
-              Service
-            </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              This month
-            </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Titles
-            </th>
-            <th scope="col" className="px-4 py-3 text-right font-medium">
-              Price
-            </th>
-            <th scope="col" className="py-3 pr-5 pl-4">
-              <span className="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {rows.map((row) => {
-            const { offering, state } = row;
-            const { label, tone, icon: Icon } = KINDS[kindOf(row)];
-            return (
-              <tr
-                key={offering.key}
-                aria-label={offering.name}
-                className={cn(
-                  'transition-colors hover:bg-muted/40',
-                  state === 'paused' && 'bg-muted/25',
-                )}
-              >
-                <td className="py-3.5 pr-4 pl-5">
-                  <div className="flex items-center gap-3">
-                    <ServiceLogo
-                      service={offering}
-                      className={cn(
-                        'size-10 rounded-xl',
-                        state === 'paused' && 'opacity-60 grayscale',
-                      )}
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{offering.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        <PlanLine row={row} />
-                      </p>
-                      {offering.kind === 'bundle' ? (
+    <>
+      <ul className="space-y-3 md:hidden" aria-label="Your services this month">
+        {rows.map((row) => (
+          <PlanCard
+            key={row.offering.key}
+            row={row}
+            providerName={providerName}
+            onDone={onDone}
+            pending={pending}
+          />
+        ))}
+        <li className="flex items-baseline justify-between px-1 pt-1 text-sm">
+          <span className="font-medium">With this plan</span>
+          <span>
+            <span className="font-semibold tabular-nums">{formatPrice(plannedCostCents)}</span>
+            <span className="text-xs text-muted-foreground">/mo</span>
+          </span>
+        </li>
+      </ul>
+      <div className="surface relative hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[760px] text-sm">
+          <thead>
+            <tr className="border-b text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              <th scope="col" className="py-3 pr-4 pl-5 font-medium">
+                Service
+              </th>
+              <th scope="col" className="px-4 py-3 font-medium">
+                This month
+              </th>
+              <th scope="col" className="px-4 py-3 font-medium">
+                Titles
+              </th>
+              <th scope="col" className="px-4 py-3 text-right font-medium">
+                Price
+              </th>
+              <th scope="col" className="py-3 pr-5 pl-4">
+                <span className="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {rows.map((row) => {
+              const { offering, state } = row;
+              const { label, tone, icon: Icon } = KINDS[kindOf(row)];
+              return (
+                <tr
+                  key={offering.key}
+                  aria-label={offering.name}
+                  className={cn(
+                    'transition-colors hover:bg-muted/40',
+                    state === 'paused' && 'bg-muted/25',
+                  )}
+                >
+                  <td className="py-3.5 pr-4 pl-5">
+                    <div className="flex items-center gap-3">
+                      <ServiceLogo
+                        service={offering}
+                        className={cn(
+                          'size-10 rounded-xl',
+                          state === 'paused' && 'opacity-60 grayscale',
+                        )}
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{offering.name}</p>
                         <p className="truncate text-xs text-muted-foreground">
-                          Includes {formatList(offering.includes.map(providerName))}
+                          <PlanLine row={row} />
                         </p>
-                      ) : null}
+                        {offering.kind === 'bundle' ? (
+                          <p className="truncate text-xs text-muted-foreground">
+                            Includes {formatList(offering.includes.map(providerName))}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3.5">
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
-                      tone,
-                    )}
-                  >
-                    <Icon className="size-3.5" aria-hidden />
-                    {label}
-                  </span>
-                  <p className="mt-1.5 text-xs text-muted-foreground">{explain(row)}</p>
-                </td>
-                <td className="px-4 py-3.5">
-                  <ServiceTitles
-                    serviceName={offering.name}
-                    includes={offering.includes}
-                    shows={row.shows}
-                    providerName={providerName}
-                  />
-                </td>
-                <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                  <Price row={row} />
-                </td>
-                <td className="py-3.5 pr-5 pl-4 text-right">
-                  <ServiceRowMenu row={row} onDone={onDone} pending={pending} />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-        <tfoot>
-          <tr className="border-t bg-muted/30">
-            <th scope="row" colSpan={3} className="py-3 pr-4 pl-5 text-left font-medium">
-              With this plan
-            </th>
-            <td className="px-4 py-3 text-right">
-              <span className="font-semibold tabular-nums">{formatPrice(plannedCostCents)}</span>
-              <span className="text-xs text-muted-foreground">/mo</span>
-            </td>
-            <td />
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
+                        tone,
+                      )}
+                    >
+                      <Icon className="size-3.5" aria-hidden />
+                      {label}
+                    </span>
+                    <p className="mt-1.5 text-xs text-muted-foreground">{explain(row)}</p>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <ServiceTitles
+                      serviceName={offering.name}
+                      includes={offering.includes}
+                      shows={row.shows}
+                      providerName={providerName}
+                    />
+                  </td>
+                  <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                    <Price row={row} />
+                  </td>
+                  <td className="py-3.5 pr-5 pl-4 text-right">
+                    <ServiceRowMenu row={row} onDone={onDone} pending={pending} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr className="border-t bg-muted/30">
+              <th scope="row" colSpan={3} className="py-3 pr-4 pl-5 text-left font-medium">
+                With this plan
+              </th>
+              <td className="px-4 py-3 text-right">
+                <span className="font-semibold tabular-nums">{formatPrice(plannedCostCents)}</span>
+                <span className="text-xs text-muted-foreground">/mo</span>
+              </td>
+              <td />
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </>
   );
 }

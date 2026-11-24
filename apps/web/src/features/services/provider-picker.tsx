@@ -22,7 +22,7 @@ export function ProviderPicker({
     return <p className="text-sm text-muted-foreground">You've added every service available.</p>;
   }
   return (
-    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {providers.map((provider) => (
         <li key={provider.key}>
           <button
@@ -33,7 +33,7 @@ export function ProviderPicker({
           >
             <ServiceLogo service={provider} className="size-10" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium">
+              <span className="line-clamp-2 block text-sm font-medium" title={provider.name}>
                 <span className="sr-only">Add </span>
                 {provider.name}
               </span>

@@ -30,7 +30,8 @@ export const Default: Story = {
       status: 'paused',
     });
 
-    const price = canvas.getByLabelText('Starz monthly price');
+    // The table (wide screens); a hidden card list holds the same rows for phones.
+    const price = within(canvas.getByRole('table')).getByLabelText('Starz monthly price');
     await userEvent.type(price, '10.99{Enter}');
     await expect(args.onChange).toHaveBeenCalledWith(expect.objectContaining({ name: 'Starz' }), {
       monthlyPriceCents: 1099,
