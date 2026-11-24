@@ -9,14 +9,19 @@ const WEB = 'http://localhost:5173';
 /**
  * A stand-in for WorkOS: sign-in codes and sealed sessions are plain strings it recognises.
  * `sealed:<userId>` is a valid session; `expired:<userId>` needs (and gets) a refresh.
+ * A code starting with `used-` was already exchanged, as when a callback is loaded twice.
  */
 const fakeWorkos: WorkosSessions = {
   authorizationUrl: (state) => `https://auth.example/authorize?state=${state}`,
   signIn: (code) =>
-    Promise.resolve({
-      sealedSession: `sealed:${code}`,
-      user: { id: code, email: `${code}@example.com`, name: null },
-    }),
+    Promise.resolve(
+      code.startsWith('used-')
+        ? null
+        : {
+            sealedSession: `sealed:${code}`,
+            user: { id: code, email: `${code}@example.com`, name: null },
+          },
+    ),
   load(sealed) {
     const [kind, userId] = sealed.split(':');
     if (!userId) return Promise.resolve(null);
@@ -93,6 +98,18 @@ describe('web sign-in with WorkOS', () => {
       .set('Cookie', 'app_auth_state=the-real-state')
       .expect(400);
     expect(ApiErrorSchema.parse(res.body).error.code).toBe('invalid_sign_in');
+  });
+
+  it('sends a repeated callback (already-used code) back to the app instead of failing', async () => {
+    const login = await request(app).get('/auth/login').expect(302);
+    const state = new URL(String(login.headers['location'])).searchParams.get('state');
+    const res = await request(app)
+      .get(`/auth/callback?code=used-${uniqueUserId()}&state=${state}`)
+      .set('Cookie', `app_auth_state=${state}`)
+      .expect(302);
+    expect(res.headers['location']).toBe(WEB);
+    // No new session: the browser keeps whatever the first, successful callback set.
+    expect(setCookie(res, 'app_session')).toBeUndefined();
   });
 
   it('authenticates API requests with the cookie', async () => {

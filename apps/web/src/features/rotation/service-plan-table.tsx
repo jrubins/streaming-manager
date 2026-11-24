@@ -20,8 +20,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { formatList, formatPrice } from '@/lib/format';
 import { manageLink } from '@/lib/manage-link';
-import { Poster } from './poster-strip';
 import { ServiceLogo } from './service-logo';
+import { ServiceTitles } from './service-titles';
 
 const STATES: Record<RotationState, { label: string; tone: string; icon: typeof Check }> = {
   keep: { label: 'Keep', tone: 'bg-keep-soft text-keep', icon: Check },
@@ -41,6 +41,8 @@ export interface ServicePlanRow {
 
 interface ServicePlanTableProps {
   rows: readonly ServicePlanRow[];
+  /** Provider key → display name, for where else a title streams. */
+  providerName: (key: string) => string;
   plannedCostCents: number;
   /** Records that the member paused or resumed a service as the plan says. */
   onDone?: (row: ServicePlanRow) => void;
@@ -63,29 +65,6 @@ function explain({ state, shows, coveredBy }: ServicePlanRow): string {
       }
       return `${shows.length === 1 ? 'Its title is' : `All ${titles} are`} also on ${formatList(coveredBy)}`;
   }
-}
-
-/** Overlapping posters of the titles on a service, with "+N" past `max`. */
-function PosterStack({ shows, max = 4 }: { shows: readonly WatchlistShow[]; max?: number }) {
-  if (shows.length === 0) return <span className="text-sm text-muted-foreground">—</span>;
-  const hidden = shows.length - max;
-  return (
-    <ul
-      className="flex items-center"
-      aria-label={`Titles: ${formatList(shows.map((s) => s.title))}`}
-    >
-      {shows.slice(0, max).map((show, index) => (
-        <li key={show.id} className={cn('w-9 shrink-0', index > 0 && '-ml-3')} title={show.title}>
-          <Poster show={show} className="rounded-md ring-2 ring-card" />
-        </li>
-      ))}
-      {hidden > 0 ? (
-        <li className="-ml-3 flex aspect-[2/3] w-9 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground ring-2 ring-card">
-          +{hidden}
-        </li>
-      ) : null}
-    </ul>
-  );
 }
 
 function ServiceRowMenu({
@@ -143,6 +122,7 @@ function ServiceRowMenu({
 /** The month's plan for every service: what to do with it, why, and what it costs. */
 export function ServicePlanTable({
   rows,
+  providerName,
   plannedCostCents,
   onDone,
   pending = false,
@@ -213,7 +193,12 @@ export function ServicePlanTable({
                   <p className="mt-1.5 text-xs text-muted-foreground">{explain(row)}</p>
                 </td>
                 <td className="px-4 py-3.5">
-                  <PosterStack shows={row.shows} />
+                  <ServiceTitles
+                    serviceName={service.name}
+                    providerKey={service.providerKey}
+                    shows={row.shows}
+                    providerName={providerName}
+                  />
                 </td>
                 <td className="px-4 py-3.5 text-right">
                   <span

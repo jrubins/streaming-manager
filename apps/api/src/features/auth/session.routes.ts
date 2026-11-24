@@ -51,8 +51,10 @@ export function sessionRouter({
     if (typeof code !== 'string' || typeof state !== 'string' || !expected || state !== expected) {
       throw new HttpError(400, 'invalid_sign_in', 'Sign-in could not be completed: start again');
     }
-    const { sealedSession } = await workos.signIn(code);
-    webSessions.startWorkosSession(res, sealedSession);
+    const signedIn = await workos.signIn(code);
+    // A used code means this callback already ran (a reload, or a retried request): the
+    // first run set the session cookie if it got through, so back to the app either way.
+    if (signedIn) webSessions.startWorkosSession(res, signedIn.sealedSession);
     res.redirect(webUrl);
   });
 

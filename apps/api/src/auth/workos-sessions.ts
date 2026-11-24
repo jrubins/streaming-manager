@@ -1,5 +1,10 @@
 import type { SessionUser } from '@app/shared';
-import { AuthenticateWithSessionCookieFailureReason, WorkOS, type User } from '@workos-inc/node';
+import {
+  AuthenticateWithSessionCookieFailureReason,
+  OauthException,
+  WorkOS,
+  type User,
+} from '@workos-inc/node';
 
 /**
  * Web sign-in with WorkOS, kept on the server: the browser only ever holds an encrypted
@@ -9,8 +14,11 @@ import { AuthenticateWithSessionCookieFailureReason, WorkOS, type User } from '@
 export interface WorkosSessions {
   /** Where to send the browser to sign in (AuthKit's hosted page). */
   authorizationUrl(state: string): string;
-  /** Exchanges the code AuthKit returned for a sealed session. */
-  signIn(code: string): Promise<{ sealedSession: string; user: SessionUser }>;
+  /**
+   * Exchanges the code AuthKit returned for a sealed session; null when the code was already
+   * used or has expired (e.g. the callback was loaded twice).
+   */
+  signIn(code: string): Promise<{ sealedSession: string; user: SessionUser } | null>;
   /**
    * The session's user, or null if it is invalid or can't be refreshed. `refreshedSession` is set
    * when the access token had expired and was refreshed: store it as the new cookie.
@@ -47,11 +55,17 @@ export function createWorkosSessions(options: WorkosSessionsOptions): WorkosSess
       }),
 
     async signIn(code) {
-      const result = await users.authenticateWithCode({
-        code,
-        clientId: options.clientId,
-        session: { sealSession: true, cookiePassword: options.cookiePassword },
-      });
+      let result;
+      try {
+        result = await users.authenticateWithCode({
+          code,
+          clientId: options.clientId,
+          session: { sealSession: true, cookiePassword: options.cookiePassword },
+        });
+      } catch (error) {
+        if (error instanceof OauthException && error.error === 'invalid_grant') return null;
+        throw error;
+      }
       if (!result.sealedSession) throw new Error('WorkOS returned no sealed session');
       return { sealedSession: result.sealedSession, user: toSessionUser(result.user) };
     },

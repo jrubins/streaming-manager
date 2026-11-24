@@ -84,6 +84,7 @@ export function PlanPage() {
         <ServicePlanTable
           rows={entries.map((entry) => ({ ...entry, coveredBy: coveredBy(entry, plan.entries) }))}
           plannedCostCents={plan.plannedCostCents}
+          providerName={providerName}
           pending={updateService.isPending}
           onDone={(row) =>
             updateService.mutate({
