@@ -6,7 +6,7 @@ import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { rotationQueryOptions } from '@/features/rotation/queries';
 import { SavingsHero } from '@/features/rotation/savings-hero';
-import { ServicePlanCard } from '@/features/rotation/service-plan-card';
+import { ServicePlanTable } from '@/features/rotation/service-plan-table';
 import { UncoveredShows } from '@/features/rotation/uncovered-shows';
 import { providersQueryOptions, useUpdateService } from '@/features/services/queries';
 
@@ -81,24 +81,17 @@ export function PlanPage() {
           title="Your services this month"
           note="Changes to make come first"
         />
-        <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
-          {entries.map((entry) => (
-            <ServicePlanCard
-              key={entry.service.id}
-              service={entry.service}
-              state={entry.state}
-              shows={entry.shows}
-              coveredBy={coveredBy(entry, plan.entries)}
-              pending={updateService.isPending}
-              onDone={() =>
-                updateService.mutate({
-                  id: entry.service.id,
-                  status: entry.state === 'pause' ? 'paused' : 'active',
-                })
-              }
-            />
-          ))}
-        </div>
+        <ServicePlanTable
+          rows={entries.map((entry) => ({ ...entry, coveredBy: coveredBy(entry, plan.entries) }))}
+          plannedCostCents={plan.plannedCostCents}
+          pending={updateService.isPending}
+          onDone={(row) =>
+            updateService.mutate({
+              id: row.service.id,
+              status: row.state === 'pause' ? 'paused' : 'active',
+            })
+          }
+        />
       </section>
 
       {plan.uncovered.length > 0 ? (

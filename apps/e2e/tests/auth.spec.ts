@@ -53,6 +53,6 @@ test("doesn't show other households' services", async ({ page, api, playwright }
 
   await page.goto('/');
 
-  await expect(page.getByRole('article', { name: 'Netflix' })).toBeVisible();
-  await expect(page.getByRole('article', { name: 'Starz' })).toHaveCount(0);
+  await expect(page.getByRole('row', { name: 'Netflix', exact: true })).toBeVisible();
+  await expect(page.getByRole('row', { name: 'Starz', exact: true })).toHaveCount(0);
 });

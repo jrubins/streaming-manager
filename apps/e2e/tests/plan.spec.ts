@@ -40,7 +40,7 @@ test.describe('plan page', () => {
     await expect(hero.getByText('$47.47')).toBeVisible();
     await expect(hero.getByText('$30.98')).toBeVisible();
 
-    const card = (name: string) => page.getByRole('article', { name });
+    const card = (name: string) => page.getByRole('row', { name, exact: true });
     await expect(card('Netflix').getByText('Keep')).toBeVisible();
     await expect(card('Netflix').getByText('Needed for 3 titles on your list')).toBeVisible();
     await expect(card('HBO Max').getByText('Resume', { exact: true })).toBeVisible();
