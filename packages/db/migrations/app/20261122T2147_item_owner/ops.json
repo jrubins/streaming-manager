@@ -1,0 +1,133 @@
+[
+  {
+    "id": "column.Item.userId",
+    "label": "Add column userId to Item",
+    "summary": "Adds column userId to table Item",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Item"
+      }
+    },
+    "operationClass": "additive",
+    "precheck": [
+      {
+        "description": "ensure column \"userId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Item",
+          "userId"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"userId\" on \"Item\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"userId\"",
+        "sql": "ALTER TABLE \"public\".\"Item\" ADD COLUMN \"userId\" text DEFAULT ('') NOT NULL"
+      },
+      {
+        "description": "drop temporary default from column \"userId\"",
+        "sql": "ALTER TABLE \"public\".\"Item\" ALTER COLUMN \"userId\" DROP DEFAULT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"userId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Item",
+          "userId"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"userId\" on \"Item\""
+        }
+      },
+      {
+        "description": "verify column \"userId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Item",
+          "userId",
+          "NO"
+        ]
+      },
+      {
+        "description": "verify column \"userId\" has no default after temporary default removal",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "Item",
+          "userId"
+        ]
+      },
+      {
+        "description": "verify column \"userId\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Item",
+          "userId",
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Item.Item_userId_createdAt_idx_f726f04a",
+    "label": "Create index \"Item_userId_createdAt_idx_f726f04a\" on \"Item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Item_userId_createdAt_idx_f726f04a",
+        "table": "Item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Item_userId_createdAt_idx_f726f04a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Item_userId_createdAt_idx_f726f04a\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Item_userId_createdAt_idx_f726f04a\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Item_userId_createdAt_idx_f726f04a\"",
+        "sql": "CREATE INDEX \"Item_userId_createdAt_idx_f726f04a\" ON \"public\".\"Item\" (\"userId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Item_userId_createdAt_idx_f726f04a\" exists on \"Item\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Item_userId_createdAt_idx_f726f04a\"",
+          "i",
+          "I",
+          "\"public\".\"Item\"",
+          "btree",
+          "[\"userId\",\"createdAt\"]"
+        ]
+      }
+    ]
+  }
+]

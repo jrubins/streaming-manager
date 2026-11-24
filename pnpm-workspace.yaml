@@ -1,0 +1,35 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Pin exact versions; bump deliberately (e.g. `pnpm up -r --latest`).
+saveExact: true
+
+# Versions shared by several workspace packages live here once.
+catalog:
+  '@playwright/test': 1.65.1
+  '@types/node': 26.6.6
+  playwright: 1.65.1
+  typescript: 6.0.3
+  vitest: 5.1.1
+  zod: 4.6.7
+
+allowBuilds:
+  esbuild: true
+
+# Prisma 8 RC pins older pg versions; use one current copy everywhere (also what Sentry instruments).
+overrides:
+  pg: 8.23.1
+  '@types/pg': 8.23.1
+
+permissions:
+  '@prisma/orm-postgres':
+    skills: true
+  '@tanstack/charts':
+    skills: true
+  '@tanstack/react-router':
+    skills: true
+  '@tanstack/router-plugin':
+    skills: true
+  prisma:
+    skills: false

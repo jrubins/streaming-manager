@@ -1,0 +1,27 @@
+{
+  "name": "@app/db",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "prisma": "dotenvx run -q -f prisma.env -f ../../.env --ignore=MISSING_ENV_FILE -- prisma",
+    "emit": "pnpm prisma contract emit",
+    "migration:plan": "node scripts/plan-migration.ts",
+    "migrate": "pnpm prisma db migrate",
+    "status": "pnpm prisma migration status",
+    "verify": "pnpm prisma db verify",
+    "migration:check": "pnpm prisma migration check"
+  },
+  "dependencies": {
+    "@prisma/orm-postgres": "8.0.0-rc.24",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@prisma/cli-engine": "0.10.0",
+    "@types/node": "catalog:",
+    "@types/pg": "8.23.1",
+    "prisma": "8.0.0-rc.34"
+  }
+}

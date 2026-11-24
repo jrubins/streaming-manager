@@ -1,0 +1,14 @@
+{
+  // Browser code, bundled by Vite (so `bundler` resolution and extensionless imports).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["vite/client", "@testing-library/jest-dom/vitest"],
+    "paths": { "@/*": ["./src/*"] },
+    "tsBuildInfoFile": "../../node_modules/.tmp/web-app.tsbuildinfo"
+  },
+  "include": ["src", ".storybook/preview.tsx"]
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // "dom": callbacks passed to page.evaluate/addInitScript run in the browser.
+    "lib": ["es2024", "dom"],
+    "types": ["node"],
+    "tsBuildInfoFile": "../../node_modules/.tmp/e2e.tsbuildinfo"
+  },
+  "include": ["tests", "playwright.config.ts"]
+}

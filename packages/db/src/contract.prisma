@@ -1,0 +1,16 @@
+// use prisma-8
+
+// Data contract: the source of truth for the database schema.
+// After editing: `pnpm --filter @app/db emit`, then `pnpm --filter @app/db migration:plan`.
+
+// Example model, used by the example API routes and web page. Replace it with your own.
+model Item {
+  id        Int                @id @default(autoincrement())
+  // Owner: the authenticated user's ID (WorkOS `sub`). Every query filters by it.
+  userId    String
+  name      String
+  createdAt DateTime           @default(now()) @onCreate(now())
+  updatedAt temporal.UpdatedAt
+
+  @@index([userId, createdAt])
+}

@@ -1,0 +1,19 @@
+# pnpm
+/build-chart-interactions
+/compose-marks-and-views
+/configure-scales-guides-color
+/coordinate-charts-with-tanstack
+/debug-and-verify-charts
+/design-a-chart
+/design-responsive-charts
+/extend-tanstack-charts
+/migrate-from-react-router
+/migrate-to-tanstack-charts
+/prepare-chart-data
+/prisma-8
+/react-router
+/router-plugin
+/router-query
+/ship-accessible-charts
+/update-and-animate-charts
+# pnpm end

@@ -1,0 +1,9 @@
+{
+  // Root-level tooling written in TypeScript (ESLint config, scripts, Claude Code hooks).
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "tsBuildInfoFile": "./node_modules/.tmp/config.tsbuildinfo"
+  },
+  "include": ["eslint.config.ts", "scripts/*.ts", ".claude/hooks/*.ts"]
+}

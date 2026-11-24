@@ -1,0 +1,120 @@
+name: Infrastructure
+
+# Terraform in infra/: plan on pull requests, apply on the production branch, then apply
+# database migrations to Neon. State is in a Cloudflare R2 bucket.
+# Every job is skipped until the TF_STATE_BUCKET repository variable is set (infra/README.md).
+on:
+  pull_request:
+    paths: ['infra/**', '.github/workflows/infra.yml']
+  push:
+    branches: [main]
+    paths: ['infra/**', 'packages/db/migrations/**', '.github/workflows/infra.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: infra
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: '1'
+  TF_INPUT: '0'
+  # Terraform state in Cloudflare R2 (S3-compatible API).
+  TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+  AWS_ENDPOINT_URL_S3: https://${{ vars.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+  AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
+  NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  # The default GITHUB_TOKEN can't change repository settings or rulesets.
+  GITHUB_TOKEN: ${{ secrets.INFRA_GITHUB_TOKEN }}
+  TF_VAR_sentry_sourcemaps_token: ${{ secrets.SENTRY_SOURCEMAPS_TOKEN }}
+  TF_VAR_workos_api_key: ${{ secrets.WORKOS_API_KEY }}
+
+defaults:
+  run:
+    working-directory: infra
+
+jobs:
+  plan:
+    if: vars.TF_STATE_BUCKET != '' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.17.2
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive
+      # Fails fast with R2's own error code (e.g. SignatureDoesNotMatch, AccessDenied), which
+      # Terraform's state check doesn't show.
+      - name: Check access to the state bucket
+        run: >-
+          aws s3api list-objects-v2 --bucket "$TF_STATE_BUCKET" --max-keys 1
+          --endpoint-url "$AWS_ENDPOINT_URL_S3" --region auto > /dev/null
+      - run: terraform init -backend-config="bucket=$TF_STATE_BUCKET"
+      - run: terraform validate
+      - name: Plan
+        run: |
+          terraform plan -no-color -out=tfplan
+          { echo '```'; terraform show -no-color tfplan; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  apply:
+    if: vars.TF_STATE_BUCKET != '' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      neon_project_id: ${{ steps.outputs.outputs.neon_project_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.17.2
+          terraform_wrapper: false
+      # Fails fast with R2's own error code (e.g. SignatureDoesNotMatch, AccessDenied), which
+      # Terraform's state check doesn't show.
+      - name: Check access to the state bucket
+        run: >-
+          aws s3api list-objects-v2 --bucket "$TF_STATE_BUCKET" --max-keys 1
+          --endpoint-url "$AWS_ENDPOINT_URL_S3" --region auto > /dev/null
+      - run: terraform init -backend-config="bucket=$TF_STATE_BUCKET"
+      - run: terraform apply -auto-approve
+      - id: outputs
+        run: echo "neon_project_id=$(terraform output -raw neon_project_id)" >> "$GITHUB_OUTPUT"
+
+  migrate:
+    needs: apply
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The direct (non-pooled) connection: migrations need a session, not PgBouncer.
+      - name: Apply migrations
+        env:
+          NEON_PROJECT_ID: ${{ needs.apply.outputs.neon_project_id }}
+          PRISMA_DISABLE_TELEMETRY: '1'
+        run: |
+          DATABASE_URL="$(pnpm dlx neonctl@9.9.3 connection-string main \
+            --project-id "$NEON_PROJECT_ID" --database-name app --role-name app)"
+          echo "::add-mask::$DATABASE_URL"
+          export DATABASE_URL
+          pnpm db:migrate

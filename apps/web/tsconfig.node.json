@@ -1,0 +1,9 @@
+{
+  // Tooling config files that run in Node (Vite, Storybook).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "tsBuildInfoFile": "../../node_modules/.tmp/web-node.tsbuildinfo"
+  },
+  "include": ["vite.config.ts", ".storybook/main.ts"]
+}

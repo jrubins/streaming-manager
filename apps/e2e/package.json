@@ -1,0 +1,14 @@
+{
+  "name": "@app/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "dotenvx run -q -f ../../.env --ignore=MISSING_ENV_FILE -- playwright test",
+    "install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@app/shared": "workspace:*",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  // Shared compiler options. Code is run by Node's built-in type stripping (no build step for
+  // Node code), so only erasable TypeScript syntax is allowed: no enums, namespaces or
+  // parameter properties. Relative imports use explicit .ts extensions.
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "moduleDetection": "force",
+    "types": [],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    // Unused code is reported by ESLint (no-unused-vars, no ignore patterns). TypeScript's own
+    // checks are off because they always exempt `_`-prefixed names.
+
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    "noEmit": true
+  }
+}
