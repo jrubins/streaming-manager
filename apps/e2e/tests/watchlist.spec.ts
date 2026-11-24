@@ -23,6 +23,7 @@ test.describe('watchlist page', () => {
     await capture('watchlist-search');
 
     await page.getByLabel('Search for a show or movie').press('Escape');
+    await expect(results).toHaveCount(0);
     await harbor.getByRole('button', { name: 'Mark The Long Harbor watched' }).click();
     await expect(page.getByRole('tab', { name: 'Watched (1)' })).toBeVisible();
     await page.getByRole('tab', { name: 'Watched (1)' }).click();
@@ -43,15 +44,23 @@ test.describe('watchlist page', () => {
     capture,
   }) => {
     await page.goto('/watchlist');
-    await page.getByLabel('Search for a show or movie').fill('a');
+    const tabs = page.getByRole('tablist');
+    const before = await tabs.boundingBox();
+    await page.getByLabel('Search for a show or movie').pressSequentially('a', { delay: 50 });
     const results = page.getByRole('list', { name: 'Search results' });
     await expect(results.getByRole('listitem').first()).toContainText('Glass Orchard');
     await expect(page.getByText(/titles, most popular first/)).toBeVisible();
 
     const scrolls = await results.evaluate((list) => list.scrollHeight > list.clientHeight);
     expect(scrolls).toBe(true);
-    // The tabs below the results stay on the first screen.
-    await expect(page.getByRole('tab', { name: /To watch/ })).toBeInViewport();
+    // The results float over the page: nothing below them moves.
+    expect(await tabs.boundingBox()).toEqual(before);
+
+    // Typing more keeps the panel in place and narrows the results.
+    await page.getByLabel('Search for a show or movie').pressSequentially('rbor', { delay: 50 });
+    await expect(results.getByRole('listitem')).toHaveCount(2);
+    await expect(results.getByRole('listitem').first()).toContainText('Harbor Lights');
+    expect(await tabs.boundingBox()).toEqual(before);
     await page.waitForLoadState('networkidle');
     await capture('watchlist-search-many');
   });
