@@ -100,7 +100,7 @@ export function createApp({
     catalog,
     streamingServices,
     watchlist,
-    rotation: createRotationService(streamingServices, watchlist),
+    rotation: createRotationService(households, catalog, streamingServices, watchlist),
   };
 
   app.disable('x-powered-by');

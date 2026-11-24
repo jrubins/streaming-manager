@@ -1,12 +1,21 @@
-import type { CatalogProvider, HouseholdMember, Service, WatchlistShow } from '@app/shared';
+import type {
+  CatalogProvider,
+  HouseholdMember,
+  ProviderPlan,
+  RotationEntry,
+  Service,
+  WatchlistShow,
+} from '@app/shared';
 
 /** Sample data for stories. Fictional titles; no images, so stories need no network. */
 
 const created = '2026-11-01T12:00:00.000Z';
 
 export function storyService(overrides: Partial<Service> & Pick<Service, 'id' | 'name'>): Service {
+  const providerKey = overrides.providerKey ?? overrides.name.toLowerCase().replace(/\W+/g, '-');
   return {
-    providerKey: overrides.name.toLowerCase().replace(/\W+/g, '-'),
+    providerKey,
+    includes: [providerKey],
     logoUrl: null,
     planName: 'Standard',
     monthlyPriceCents: 1299,
@@ -88,15 +97,31 @@ export const SERVICES = {
   }),
 };
 
+const plan = (
+  name: string,
+  dollars: number,
+  features: Partial<Pick<ProviderPlan, 'ads' | 'streams' | 'uhd' | 'downloads'>> = {},
+): ProviderPlan => ({
+  name,
+  monthlyPriceCents: Math.round(dollars * 100),
+  ads: false,
+  streams: 2,
+  uhd: false,
+  downloads: false,
+  ...features,
+});
+
 export const PROVIDERS: CatalogProvider[] = [
   {
     key: 'netflix',
     name: 'Netflix',
+    kind: 'service',
+    includes: ['netflix'],
     logoUrl: null,
     plans: [
-      { name: 'Standard with ads', monthlyPriceCents: 899 },
-      { name: 'Standard', monthlyPriceCents: 1999 },
-      { name: 'Premium', monthlyPriceCents: 2699 },
+      plan('Standard with ads', 8.99, { ads: true, downloads: true }),
+      plan('Standard', 19.99, { downloads: true }),
+      plan('Premium', 26.99, { streams: 4, uhd: true, downloads: true }),
     ],
     pricesAsOf: '2026-11-24',
     manageUrl: 'https://www.netflix.com/account',
@@ -104,23 +129,66 @@ export const PROVIDERS: CatalogProvider[] = [
   {
     key: 'hulu',
     name: 'Hulu',
+    kind: 'service',
+    includes: ['hulu'],
     logoUrl: null,
-    plans: [
-      { name: 'With ads', monthlyPriceCents: 1249 },
-      { name: 'No ads', monthlyPriceCents: 2149 },
-    ],
+    plans: [plan('With ads', 12.49, { ads: true }), plan('No ads', 21.49, { downloads: true })],
     pricesAsOf: '2026-11-24',
     manageUrl: 'https://www.hulu.com/account',
   },
   {
+    key: 'disney-hulu-espn-select',
+    name: 'Disney+, Hulu & ESPN Select',
+    kind: 'bundle',
+    includes: ['disney-plus', 'hulu', 'espn-plus'],
+    logoUrl: null,
+    plans: [
+      plan('With ads', 21.99, { ads: true }),
+      plan('Premium', 32.99, { ads: true, downloads: true }),
+    ],
+    pricesAsOf: '2026-11-24',
+    manageUrl: 'https://www.disneyplus.com/account',
+  },
+  {
     key: 'starz',
     name: 'Starz',
+    kind: 'service',
+    includes: ['starz'],
     logoUrl: null,
     plans: [],
     pricesAsOf: null,
     manageUrl: null,
   },
 ];
+
+const offeringOf = (key: string) => {
+  const provider = PROVIDERS.find((p) => p.key === key);
+  if (!provider) throw new Error(`No story provider ${key}`);
+  return {
+    key: provider.key,
+    name: provider.name,
+    kind: provider.kind,
+    includes: provider.includes,
+    logoUrl: provider.logoUrl,
+    manageUrl: provider.manageUrl,
+  };
+};
+
+/** A plan row: an entry of GET /rotation, with sensible defaults. */
+export function storyEntry(
+  overrides: Partial<RotationEntry> & Pick<RotationEntry, 'state'> & { key: string },
+): RotationEntry {
+  const { key, ...rest } = overrides;
+  return {
+    offering: offeringOf(key),
+    service: null,
+    plan: null,
+    planChange: false,
+    plannedCostCents: null,
+    shows: [],
+    ...rest,
+  };
+}
 
 export const MEMBERS: HouseholdMember[] = [
   { userId: 'user_1', displayName: 'Alex Lee', joinedAt: created, isYou: true },

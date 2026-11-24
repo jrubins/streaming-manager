@@ -20,10 +20,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ServiceLogo } from '@/features/rotation/service-logo';
-import { formatPrice } from '@/lib/format';
+import { formatList, formatPrice } from '@/lib/format';
 import { manageLink } from '@/lib/manage-link';
 
 const CUSTOM = '__custom__';
+
+/** "ads · 2 screens · HD", for choosing between plans. */
+function planFeatures(plan: CatalogProvider['plans'][number]): string {
+  return [
+    plan.ads ? 'ads' : 'no ads',
+    `${plan.streams} ${plan.streams === 1 ? 'screen' : 'screens'}`,
+    plan.uhd ? '4K' : 'HD',
+    ...(plan.downloads ? ['downloads'] : []),
+  ].join(' · ');
+}
 
 const SOURCE_LABELS = {
   catalog: 'Published price',
@@ -35,6 +45,8 @@ interface ServicesTableProps {
   services: readonly Service[];
   /** Known plans by provider key. */
   plansFor: (providerKey: string) => CatalogProvider['plans'];
+  /** Provider key → display name, for what a bundle includes. */
+  providerName: (key: string) => string;
   onChange: (service: Service, changes: UpdateService) => void;
   onRemove: (service: Service) => void;
   pending?: boolean;
@@ -44,6 +56,7 @@ interface ServicesTableProps {
 export function ServicesTable({
   services,
   plansFor,
+  providerName,
   onChange,
   onRemove,
   pending = false,
@@ -80,6 +93,7 @@ export function ServicesTable({
               key={`${service.id}:${service.monthlyPriceCents}`}
               service={service}
               plans={plansFor(service.providerKey)}
+              providerName={providerName}
               onChange={(changes) => onChange(service, changes)}
               onRemove={() => onRemove(service)}
               pending={pending}
@@ -106,12 +120,14 @@ export function ServicesTable({
 function ServiceRow({
   service,
   plans,
+  providerName,
   onChange,
   onRemove,
   pending,
 }: {
   service: Service;
   plans: CatalogProvider['plans'];
+  providerName: (key: string) => string;
   onChange: (changes: UpdateService) => void;
   onRemove: () => void;
   pending: boolean;
@@ -150,6 +166,11 @@ function ServiceRow({
           />
           <div className="min-w-0">
             <p className="truncate font-semibold">{service.name}</p>
+            {service.includes.length > 1 ? (
+              <p className="truncate text-xs text-muted-foreground">
+                {formatList(service.includes.map(providerName))}
+              </p>
+            ) : null}
             <p className="truncate text-xs text-muted-foreground">
               {service.priceSource ? SOURCE_LABELS[service.priceSource] : 'No price yet'}
             </p>
@@ -195,6 +216,7 @@ function ServiceRow({
               {plans.map((plan) => (
                 <SelectItem key={plan.name} value={plan.name}>
                   {plan.name} · {formatPrice(plan.monthlyPriceCents)}
+                  <span className="text-xs text-muted-foreground"> ({planFeatures(plan)})</span>
                 </SelectItem>
               ))}
               <SelectItem value={CUSTOM}>{service.planName ?? 'Other plan'}</SelectItem>

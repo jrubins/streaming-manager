@@ -72,6 +72,13 @@
         "models": {
           "Household": {
             "fields": {
+              "allowAds": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -96,6 +103,13 @@
                   "kind": "scalar"
                 }
               },
+              "minStreams": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "name": {
                 "nullable": false,
                 "type": {
@@ -107,6 +121,27 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "require4k": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "requireDownloads": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "suggestNewServices": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -170,6 +205,9 @@
             },
             "storage": {
               "fields": {
+                "allowAds": {
+                  "column": "allowAds"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -179,11 +217,23 @@
                 "inviteCode": {
                   "column": "inviteCode"
                 },
+                "minStreams": {
+                  "column": "minStreams"
+                },
                 "name": {
                   "column": "name"
                 },
                 "region": {
                   "column": "region"
+                },
+                "require4k": {
+                  "column": "require4k"
+                },
+                "requireDownloads": {
+                  "column": "requireDownloads"
+                },
+                "suggestNewServices": {
+                  "column": "suggestNewServices"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -617,6 +667,15 @@
           "table": {
             "Household": {
               "columns": {
+                "allowAds": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nullable": false
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-date@1",
                   "dataType": "pg/timestamptz",
@@ -643,6 +702,15 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "minStreams": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "default": {
+                    "kind": "literal",
+                    "value": 1
+                  },
+                  "nullable": false
+                },
                 "name": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -654,6 +722,33 @@
                   "default": {
                     "kind": "literal",
                     "value": "US"
+                  },
+                  "nullable": false
+                },
+                "require4k": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "requireDownloads": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "suggestNewServices": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
                   },
                   "nullable": false
                 },
@@ -1102,7 +1197,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "2a05321a727abc4e4171019eeaff87c4011a4167d6fdadf0f35184c0307d836b"
+    "storageHash": "3fa41ba7d8d8b75f5f46f74be4237ffa7f75728a23a8a27317a5a0c75be3c057"
   },
   "execution": {
     "executionHash": "c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606",

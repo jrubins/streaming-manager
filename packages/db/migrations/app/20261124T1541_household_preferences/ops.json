@@ -1,0 +1,352 @@
+[
+  {
+    "id": "column.public.Household.allowAds",
+    "label": "Add column \"allowAds\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "allowAds",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"allowAds\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "allowAds"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"allowAds\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"allowAds\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"allowAds\" bool DEFAULT true NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"allowAds\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "allowAds"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"allowAds\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"allowAds\" has type \"boolean\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "allowAds",
+          "boolean"
+        ]
+      },
+      {
+        "description": "verify column \"allowAds\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "allowAds",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Household.minStreams",
+    "label": "Add column \"minStreams\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "minStreams",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"minStreams\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "minStreams"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"minStreams\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"minStreams\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"minStreams\" int4 DEFAULT 1 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"minStreams\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "minStreams"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"minStreams\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"minStreams\" has type \"integer\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "minStreams",
+          "integer"
+        ]
+      },
+      {
+        "description": "verify column \"minStreams\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "minStreams",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Household.require4k",
+    "label": "Add column \"require4k\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "require4k",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"require4k\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "require4k"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"require4k\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"require4k\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"require4k\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"require4k\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "require4k"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"require4k\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"require4k\" has type \"boolean\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "require4k",
+          "boolean"
+        ]
+      },
+      {
+        "description": "verify column \"require4k\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "require4k",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Household.requireDownloads",
+    "label": "Add column \"requireDownloads\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "requireDownloads",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"requireDownloads\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "requireDownloads"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"requireDownloads\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"requireDownloads\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"requireDownloads\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"requireDownloads\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "requireDownloads"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"requireDownloads\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"requireDownloads\" has type \"boolean\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "requireDownloads",
+          "boolean"
+        ]
+      },
+      {
+        "description": "verify column \"requireDownloads\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "requireDownloads",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Household.suggestNewServices",
+    "label": "Add column \"suggestNewServices\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "suggestNewServices",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"suggestNewServices\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "suggestNewServices"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"suggestNewServices\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"suggestNewServices\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"suggestNewServices\" bool DEFAULT true NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"suggestNewServices\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "suggestNewServices"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"suggestNewServices\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"suggestNewServices\" has type \"boolean\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "suggestNewServices",
+          "boolean"
+        ]
+      },
+      {
+        "description": "verify column \"suggestNewServices\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "suggestNewServices",
+          "NO"
+        ]
+      }
+    ]
+  }
+]

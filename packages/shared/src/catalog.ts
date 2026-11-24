@@ -1,16 +1,34 @@
 import { z } from 'zod';
 import { MediaTypeSchema } from './watchlist.ts';
 
+/** A plan of a service or bundle: its price and what it allows. */
 export const ProviderPlanSchema = z.object({
   name: z.string(),
   monthlyPriceCents: z.number().int(),
+  /** Whether it shows ads (on a bundle: on any of its services). */
+  ads: z.boolean(),
+  /** How many screens can stream at once. */
+  streams: z.number().int(),
+  /** 4K / UHD picture. */
+  uhd: z.boolean(),
+  /** Downloads for offline viewing. */
+  downloads: z.boolean(),
 });
 export type ProviderPlan = z.infer<typeof ProviderPlanSchema>;
 
-/** A streaming service available in the household's region, with known plan prices. */
+export const OfferingKindSchema = z.enum(['service', 'bundle']);
+export type OfferingKind = z.infer<typeof OfferingKindSchema>;
+
+/**
+ * Something a household can subscribe to in its region: one service, or a bundle of several,
+ * with known plans and prices.
+ */
 export const CatalogProviderSchema = z.object({
   key: z.string(),
   name: z.string(),
+  kind: OfferingKindSchema,
+  /** The services (provider keys) it unlocks: itself, or each service of a bundle. */
+  includes: z.string().array(),
   logoUrl: z.string().nullable(),
   plans: ProviderPlanSchema.array(),
   /** When the plan prices were last checked (YYYY-MM-DD), or null without known prices. */

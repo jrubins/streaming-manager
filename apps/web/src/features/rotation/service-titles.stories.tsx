@@ -17,7 +17,7 @@ const meta = {
   component: ServiceTitles,
   args: {
     serviceName: 'Netflix',
-    providerKey: 'netflix',
+    includes: ['netflix'],
     shows: many,
     providerName: (key: string) => ({ hulu: 'Hulu', peacock: 'Peacock' })[key] ?? key,
   },

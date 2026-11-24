@@ -3,6 +3,7 @@ import type { Server } from 'node:http';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import {
   ApiErrorSchema,
+  PreferencesSchema,
   RotationPlanSchema,
   ServiceSchema,
   WatchlistShowSchema,
@@ -50,6 +51,8 @@ describe('MCP endpoint', () => {
     expect(tools.map((tool) => tool.name)).toEqual(
       expect.arrayContaining([
         'get_rotation_plan',
+        'get_preferences',
+        'update_preferences',
         'list_watchlist',
         'search_titles',
         'add_to_watchlist',
@@ -84,7 +87,9 @@ describe('MCP endpoint', () => {
     const alicePlan = RotationPlanSchema.parse(
       (await alice.callTool({ name: 'get_rotation_plan', arguments: {} })).structuredContent,
     );
-    expect(alicePlan.entries).toContainEqual({ service, state: 'keep', shows: [show] });
+    expect(alicePlan.entries).toContainEqual(
+      expect.objectContaining({ service, state: 'keep', planChange: false, shows: [show] }),
+    );
 
     const List = z.object({ shows: WatchlistShowSchema.array() });
     const bobList = await bob.callTool({ name: 'list_watchlist', arguments: {} });
@@ -95,6 +100,11 @@ describe('MCP endpoint', () => {
       arguments: { id: show.id, watched: true },
     });
     expect(WatchlistShowSchema.parse(watched.structuredContent).watched).toBe(true);
+    const prefs = await alice.callTool({
+      name: 'update_preferences',
+      arguments: { allowAds: false },
+    });
+    expect(PreferencesSchema.parse(prefs.structuredContent).allowAds).toBe(false);
     const paused = await alice.callTool({
       name: 'update_service',
       arguments: { id: service.id, status: 'paused' },

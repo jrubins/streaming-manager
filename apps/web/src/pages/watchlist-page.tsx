@@ -39,7 +39,7 @@ export function WatchlistPage() {
     [providers.data],
   );
   const householdKeys = useMemo(
-    () => new Set((services.data ?? []).map((s) => s.providerKey)),
+    () => new Set((services.data ?? []).flatMap((s) => s.includes)),
     [services.data],
   );
   const added = useMemo(() => new Set(shows.map(titleKey)), [shows]);

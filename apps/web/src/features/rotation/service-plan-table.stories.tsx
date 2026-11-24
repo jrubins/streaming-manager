@@ -1,25 +1,63 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { SERVICES, SHOWS } from '@/test/story-data';
+import { PROVIDERS, SERVICES, SHOWS, storyEntry, storyService } from '@/test/story-data';
 import { ServicePlanTable } from './service-plan-table';
+
+const plansOf = (key: string) => PROVIDERS.find((p) => p.key === key)?.plans ?? [];
+const netflix = storyService({
+  id: 1,
+  name: 'Netflix',
+  providerKey: 'netflix',
+  planName: 'Standard',
+  monthlyPriceCents: 1999,
+  manageUrl: 'https://www.netflix.com/account',
+});
 
 const meta = {
   title: 'Plan/ServicePlanTable',
   component: ServicePlanTable,
   args: {
-    plannedCostCents: 3098,
-    providerName: (key: string) => ({ netflix: 'Netflix', hulu: 'Hulu' })[key] ?? key,
+    plannedCostCents: 899 + 2199,
+    providerName: (key: string) =>
+      ({ netflix: 'Netflix', hulu: 'Hulu', 'disney-plus': 'Disney+', 'espn-plus': 'ESPN+' })[key] ??
+      key,
     onDone: fn(),
     rows: [
-      { service: SERVICES.max, state: 'resume', shows: [SHOWS.signal], coveredBy: [] },
-      { service: SERVICES.hulu, state: 'pause', shows: [SHOWS.lights], coveredBy: ['Netflix'] },
       {
-        service: SERVICES.netflix,
-        state: 'keep',
-        shows: [SHOWS.harbor, SHOWS.lights, SHOWS.northbound],
+        ...storyEntry({
+          key: 'disney-hulu-espn-select',
+          state: 'subscribe',
+          plan: plansOf('disney-hulu-espn-select')[0] ?? null,
+          plannedCostCents: 2199,
+          shows: [SHOWS.lights],
+        }),
         coveredBy: [],
       },
-      { service: SERVICES.starz, state: 'paused', shows: [], coveredBy: [] },
+      {
+        ...storyEntry({
+          key: 'hulu',
+          state: 'pause',
+          service: SERVICES.hulu,
+          shows: [SHOWS.lights],
+        }),
+        coveredBy: ['Disney+, Hulu & ESPN Select'],
+      },
+      {
+        ...storyEntry({
+          key: 'netflix',
+          state: 'keep',
+          service: netflix,
+          plan: plansOf('netflix')[0] ?? null,
+          planChange: true,
+          plannedCostCents: 899,
+          shows: [SHOWS.harbor, SHOWS.northbound],
+        }),
+        coveredBy: [],
+      },
+      {
+        ...storyEntry({ key: 'starz', state: 'paused', service: SERVICES.starz }),
+        coveredBy: [],
+      },
     ],
   },
 } satisfies Meta<typeof ServicePlanTable>;
@@ -31,16 +69,19 @@ export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const body = within(canvasElement.ownerDocument.body);
-    await expect(canvas.getByText('Its title is also on Netflix')).toBeInTheDocument();
+    await expect(canvas.getByText('Switch plan')).toBeInTheDocument();
+    await expect(canvas.getByText('Same titles for $11.00 less')).toBeInTheDocument();
+    await expect(canvas.getByText('Includes Disney+, Hulu, and ESPN+')).toBeInTheDocument();
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Hulu actions' }));
-    await expect(await body.findByRole('menuitem', { name: 'Pause on hulu.com' })).toHaveAttribute(
-      'href',
-      'https://www.hulu.com/account',
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Disney+, Hulu & ESPN Select actions' }),
     );
-    await userEvent.click(body.getByRole('menuitem', { name: 'Mark as paused' }));
+    await expect(
+      await body.findByRole('menuitem', { name: 'Subscribe on disneyplus.com' }),
+    ).toHaveAttribute('href', 'https://www.disneyplus.com/account');
+    await userEvent.click(body.getByRole('menuitem', { name: 'Mark as subscribed' }));
     await expect(args.onDone).toHaveBeenCalledWith(
-      expect.objectContaining({ state: 'pause', service: SERVICES.hulu }),
+      expect.objectContaining({ state: 'subscribe', plannedCostCents: 2199 }),
     );
   },
 };
