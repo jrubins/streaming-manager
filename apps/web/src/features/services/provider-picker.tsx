@@ -22,12 +22,14 @@ export function ProviderPicker({ providers, onAdd, pending = false }: ProviderPi
             type="button"
             disabled={pending}
             onClick={() => onAdd(provider)}
-            aria-label={`Add ${provider.name}`}
             className="group surface flex w-full items-center gap-3 p-3 text-left transition-colors hover:border-primary/40 hover:bg-accent/30 disabled:opacity-50"
           >
             <ServiceLogo service={provider} className="size-10" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium">{provider.name}</span>
+              <span className="block truncate text-sm font-medium">
+                <span className="sr-only">Add </span>
+                {provider.name}
+              </span>
               <span className="block text-xs text-muted-foreground">
                 {provider.plans[0]
                   ? `from ${formatPrice(provider.plans[0].monthlyPriceCents)}`

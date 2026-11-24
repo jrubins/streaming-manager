@@ -15,10 +15,10 @@ export function PosterStrip({ shows, max = 5, muted = false }: PosterStripProps)
   const visible = shows.slice(0, max);
   const hidden = shows.length - visible.length;
   return (
-    <ul className={cn('flex gap-3', muted && 'opacity-55 saturate-50')} aria-label="Titles">
+    <ul className="flex gap-3" aria-label="Titles">
       {visible.map((show) => (
         <li key={show.id} className="w-[84px] shrink-0">
-          <Poster show={show} />
+          <Poster show={show} className={cn(muted && 'grayscale')} />
           <p className="mt-1.5 line-clamp-2 text-xs leading-tight text-muted-foreground">
             {show.title}
           </p>

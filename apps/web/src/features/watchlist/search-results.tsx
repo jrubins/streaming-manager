@@ -48,7 +48,7 @@ export function SearchResults({ results, added, onAdd, adding = null }: SearchRe
               variant={isAdded ? 'ghost' : 'secondary'}
               disabled={isAdded || adding === key}
               onClick={() => onAdd(result)}
-              aria-label={isAdded ? `${result.title} is on your list` : `Add ${result.title}`}
+              aria-label={isAdded ? `Added ${result.title}` : `Add ${result.title}`}
             >
               {isAdded ? <Check aria-hidden /> : <Plus aria-hidden />}
               {isAdded ? 'Added' : 'Add'}

@@ -225,7 +225,7 @@ function ServiceRow({
         </div>
       </td>
       <td className="py-3 pr-5 pl-4 text-right">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"

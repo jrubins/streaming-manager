@@ -30,7 +30,7 @@ export function WatchlistCard({
   return (
     <article aria-label={show.title} className="group flex flex-col">
       <div className="relative">
-        <Poster show={show} className={cn('rounded-xl', show.watched && 'opacity-50 grayscale')} />
+        <Poster show={show} className={cn('rounded-xl', show.watched && 'grayscale')} />
         <div className="absolute top-2 right-2 flex gap-1">
           <Button
             variant="secondary"

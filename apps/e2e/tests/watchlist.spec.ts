@@ -14,9 +14,7 @@ test.describe('watchlist page', () => {
     await expect(results.getByText('The Long Harbor')).toBeVisible();
     await expect(results.getByText('Harbor Person')).toHaveCount(0);
     await page.getByRole('button', { name: 'Add The Long Harbor' }).click();
-    await expect(
-      page.getByRole('button', { name: 'The Long Harbor is on your list' }),
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Added The Long Harbor' })).toBeVisible();
 
     const harbor = page.getByRole('article', { name: 'The Long Harbor' });
     await expect(harbor.getByText('On Netflix')).toBeVisible();

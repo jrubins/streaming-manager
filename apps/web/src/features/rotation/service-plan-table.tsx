@@ -105,7 +105,7 @@ function ServiceRowMenu({
     ? `${verb} on ${link.site}`
     : `Find how to ${verb.toLowerCase()} ${service.name}`;
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"

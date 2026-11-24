@@ -60,7 +60,7 @@ export function AppSidebar({
               Stream Rotation
             </span>
             {householdName ? (
-              <span className="block truncate text-xs text-sidebar-foreground/70">
+              <span className="block truncate text-xs text-sidebar-foreground">
                 {householdName}
               </span>
             ) : null}
@@ -70,7 +70,7 @@ export function AppSidebar({
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60">Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV.map(({ to, label, icon: Icon }) => {
@@ -88,7 +88,7 @@ export function AppSidebar({
                       </Link>
                     </SidebarMenuButton>
                     {badge ? (
-                      <SidebarMenuBadge className="top-2.5 text-sidebar-foreground/70">
+                      <SidebarMenuBadge className="top-2.5 text-sidebar-foreground">
                         {badge}
                       </SidebarMenuBadge>
                     ) : null}
@@ -117,7 +117,7 @@ export function AppSidebar({
               onClick={onSignOut}
               aria-label="Sign out"
               title="Sign out"
-              className="rounded-md p-2 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="rounded-md p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <LogOut className="size-4" aria-hidden />
             </button>
