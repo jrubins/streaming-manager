@@ -30,6 +30,8 @@ export const ServiceSchema = z.object({
   monthlyPriceCents: z.number().int().nullable(),
   priceSource: PriceSourceSchema.nullable(),
   status: ServiceStatusSchema,
+  /** The service's own page for pausing, cancelling or resuming, when known. */
+  manageUrl: z.string().nullable(),
   createdAt: z.iso.datetime(),
 });
 export type Service = z.infer<typeof ServiceSchema>;

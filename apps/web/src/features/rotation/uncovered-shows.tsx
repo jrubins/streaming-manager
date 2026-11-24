@@ -15,7 +15,7 @@ export function UncoveredShows({ shows, providerName }: UncoveredShowsProps) {
       {shows.map((show) => (
         <li
           key={show.id}
-          className="flex items-center gap-4 rounded-2xl border border-dashed bg-card/60 p-3"
+          className="flex items-center gap-4 rounded-2xl border border-dashed border-border bg-card/60 p-3"
         >
           <Poster show={show} className="w-14" />
           <div className="min-w-0">

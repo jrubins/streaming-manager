@@ -23,7 +23,10 @@ export function SearchResults({ results, added, onAdd, adding = null }: SearchRe
         const key = titleKey(result);
         const isAdded = added.has(key);
         return (
-          <li key={key} className="flex items-center gap-3 rounded-xl border bg-card p-2.5">
+          <li
+            key={key}
+            className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/60 p-2.5"
+          >
             {result.posterUrl ? (
               <img
                 src={result.posterUrl}

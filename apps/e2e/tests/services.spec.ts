@@ -8,7 +8,7 @@ test.describe('services page', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Services' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Add Netflix' }).click();
-    const netflix = page.getByRole('article', { name: 'Netflix' });
+    const netflix = page.getByRole('row', { name: 'Netflix', exact: true });
     await expect(netflix.getByLabel('Netflix monthly price')).toHaveValue('8.99');
     await expect(page.getByRole('button', { name: 'Add Netflix' })).toHaveCount(0);
 
@@ -29,7 +29,12 @@ test.describe('services page', () => {
     await page.waitForLoadState('networkidle');
     await capture('services');
 
-    await page.getByRole('button', { name: 'Remove Netflix' }).click();
+    await netflix.getByRole('button', { name: 'Netflix actions' }).click();
+    await expect(page.getByRole('menuitem', { name: 'Manage on netflix.com' })).toHaveAttribute(
+      'href',
+      'https://www.netflix.com/account',
+    );
+    await page.getByRole('menuitem', { name: 'Remove Netflix' }).click();
     await expect(netflix).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Add Netflix' })).toBeVisible();
   });

@@ -54,6 +54,7 @@ describe('services API', () => {
       planName: 'Basic with ads',
       monthlyPriceCents: 1099,
       priceSource: 'catalog',
+      manageUrl: 'https://www.hbomax.com/subscription',
     });
     const list = await request(app).get('/services').set('Authorization', auth).expect(200);
     expect(ServiceSchema.array().parse(list.body)).toContainEqual(service);
@@ -85,6 +86,7 @@ describe('services API', () => {
     expect(await addService(auth, { providerKey: 'starz' })).toMatchObject({
       monthlyPriceCents: null,
       priceSource: null,
+      manageUrl: null,
     });
   });
 

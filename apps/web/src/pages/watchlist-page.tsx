@@ -74,7 +74,7 @@ export function WatchlistPage() {
         description="Everything your household wants to watch. The plan keeps a service for each of these."
       />
 
-      <section aria-label="Find titles" className="mb-10 rounded-2xl border bg-card p-4 shadow-sm">
+      <section aria-label="Find titles" className="surface mb-10 p-4">
         <div className="relative">
           <Search
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"

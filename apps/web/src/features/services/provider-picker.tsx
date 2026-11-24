@@ -23,7 +23,7 @@ export function ProviderPicker({ providers, onAdd, pending = false }: ProviderPi
             disabled={pending}
             onClick={() => onAdd(provider)}
             aria-label={`Add ${provider.name}`}
-            className="group flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-md disabled:opacity-50"
+            className="group surface flex w-full items-center gap-3 p-3 text-left transition-colors hover:border-primary/40 hover:bg-accent/30 disabled:opacity-50"
           >
             <ServiceLogo service={provider} className="size-10" />
             <span className="min-w-0 flex-1">

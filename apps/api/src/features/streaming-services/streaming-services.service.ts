@@ -3,6 +3,7 @@ import type { CreateService, PriceSource, Service, UpdateService } from '@app/sh
 import { isUniqueViolation } from '../../lib/db-errors.ts';
 import { HttpError, notFound } from '../../lib/http-error.ts';
 import type { CatalogService } from '../catalog/catalog.service.ts';
+import { manageUrl } from '../catalog/manage-links.ts';
 import type { TmdbClient } from '../catalog/tmdb.client.ts';
 import type { HouseholdService } from '../household/household.service.ts';
 
@@ -36,6 +37,7 @@ export function createStreamingServicesService(
     monthlyPriceCents: row.monthlyPriceCents,
     priceSource: row.priceSource,
     status: row.status,
+    manageUrl: manageUrl(row.providerKey),
     createdAt: row.createdAt.toISOString(),
   });
 

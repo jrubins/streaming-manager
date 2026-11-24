@@ -1,5 +1,6 @@
 import type { CatalogProvider, ProviderPlan, Region, TitleSearchResult } from '@app/shared';
 import type { HouseholdService } from '../household/household.service.ts';
+import { manageUrl } from './manage-links.ts';
 import { plansFor, PRICES_AS_OF } from './price-catalog.ts';
 import type { TmdbClient, TmdbProvider } from './tmdb.client.ts';
 
@@ -30,6 +31,7 @@ export function createCatalogService(tmdb: TmdbClient, households: HouseholdServ
         logoUrl: tmdb.imageUrl(provider.logoPath, 'w92'),
         plans: provider.plans,
         pricesAsOf: provider.plans.length > 0 ? PRICES_AS_OF : null,
+        manageUrl: manageUrl(provider.key),
       }));
     },
 

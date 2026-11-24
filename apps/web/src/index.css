@@ -130,6 +130,16 @@
   --color-sidebar: var(--sidebar);
 }
 
+/* The app's standard card: soft border, faint shadow. */
+@utility surface {
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background-color: var(--card);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 4px 16px -6px rgb(0 0 0 / 0.06);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

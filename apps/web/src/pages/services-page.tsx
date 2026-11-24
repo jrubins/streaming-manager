@@ -8,8 +8,7 @@ import {
   useDeleteService,
   useUpdateService,
 } from '@/features/services/queries';
-import { ServiceEditor } from '@/features/services/service-editor';
-import { formatPrice } from '@/lib/format';
+import { ServicesTable } from '@/features/services/services-table';
 
 export function ServicesPage() {
   const { data: services } = useSuspenseQuery(servicesQueryOptions);
@@ -19,25 +18,14 @@ export function ServicesPage() {
   const remove = useDeleteService();
 
   const active = services.filter((s) => s.status === 'active');
-  const total = active.reduce((sum, s) => sum + (s.monthlyPriceCents ?? 0), 0);
   const have = new Set(services.map((s) => s.providerKey));
   const available = (providers.data ?? []).filter((p) => !have.has(p.key));
-  const plansFor = (key: string) => providers.data?.find((p) => p.key === key)?.plans ?? [];
 
   return (
     <>
       <PageHeader
         title="Services"
-        description="The subscriptions your household has. Prices come from published plans; change them to match your bill."
-        actions={
-          <div className="rounded-xl border bg-card px-4 py-2 text-right shadow-sm">
-            <p className="text-xs text-muted-foreground">Active now</p>
-            <p className="text-lg font-semibold tabular-nums">
-              {formatPrice(total)}
-              <span className="text-sm font-normal text-muted-foreground">/mo</span>
-            </p>
-          </div>
-        }
+        description="The subscriptions your household has. Prices start from published plans; change them to match your bill."
       />
 
       <section aria-labelledby="your-services">
@@ -51,19 +39,18 @@ export function ServicesPage() {
             No services yet. Add the ones you subscribe to (or used to) below.
           </p>
         ) : (
-          <div className="space-y-3">
-            {services.map((service) => (
-              <ServiceEditor
-                key={`${service.id}:${service.monthlyPriceCents}`}
-                service={service}
-                plans={plansFor(service.providerKey)}
-                pending={update.isPending || remove.isPending}
-                onChange={(changes) => update.mutate({ id: service.id, ...changes })}
-                onRemove={() => remove.mutate(service.id)}
-              />
-            ))}
-          </div>
+          <ServicesTable
+            services={services}
+            plansFor={(key) => providers.data?.find((p) => p.key === key)?.plans ?? []}
+            pending={update.isPending || remove.isPending}
+            onChange={(service, changes) => update.mutate({ id: service.id, ...changes })}
+            onRemove={(service) => remove.mutate(service.id)}
+          />
         )}
+        <p className="mt-3 text-xs text-muted-foreground">
+          Billed through Apple, Google Play, Roku or Amazon? Pause or cancel it in that store's
+          subscription settings.
+        </p>
       </section>
 
       <section aria-labelledby="add-service" className="mt-12">

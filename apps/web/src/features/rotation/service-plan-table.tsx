@@ -1,15 +1,25 @@
 import type { RotationState, Service, WatchlistShow } from '@app/shared';
 import { cn } from 'cn';
-import { Check, CircleCheck, CirclePause, CirclePlay, Moon, MoreHorizontal } from 'lucide-react';
+import {
+  Check,
+  CircleCheck,
+  CirclePause,
+  CirclePlay,
+  Moon,
+  MoreHorizontal,
+  ExternalLink,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { formatList, formatPrice } from '@/lib/format';
+import { manageLink } from '@/lib/manage-link';
 import { Poster } from './poster-strip';
 import { ServiceLogo } from './service-logo';
 
@@ -78,6 +88,58 @@ function PosterStack({ shows, max = 4 }: { shows: readonly WatchlistShow[]; max?
   );
 }
 
+function ServiceRowMenu({
+  row,
+  onDone,
+  pending,
+}: {
+  row: ServicePlanRow;
+  onDone: ((row: ServicePlanRow) => void) | undefined;
+  pending: boolean;
+}) {
+  const { service, state } = row;
+  const link = manageLink(service);
+  const actionable = state === 'pause' || state === 'resume';
+  const verb = state === 'pause' ? 'Pause' : state === 'resume' ? 'Resume' : 'Manage';
+  const linkLabel = link.site
+    ? `${verb} on ${link.site}`
+    : `Find how to ${verb.toLowerCase()} ${service.name}`;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          disabled={pending}
+          aria-label={`${service.name} actions`}
+        >
+          <MoreHorizontal aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-56">
+        <DropdownMenuLabel className="text-xs text-muted-foreground">
+          {service.name}
+        </DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <a href={link.href} target="_blank" rel="noopener noreferrer">
+            <ExternalLink aria-hidden />
+            {linkLabel}
+          </a>
+        </DropdownMenuItem>
+        {actionable && onDone ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => onDone(row)}>
+              <CircleCheck aria-hidden />
+              {state === 'pause' ? 'Mark as paused' : 'Mark as resumed'}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 /** The month's plan for every service: what to do with it, why, and what it costs. */
 export function ServicePlanTable({
   rows,
@@ -86,7 +148,7 @@ export function ServicePlanTable({
   pending = false,
 }: ServicePlanTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border/70 bg-card shadow-[0_1px_2px_rgb(0_0_0/0.04),0_4px_16px_-6px_rgb(0_0_0/0.06)]">
+    <div className="overflow-x-auto surface">
       <table className="w-full min-w-[720px] text-sm">
         <thead>
           <tr className="border-b text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -165,29 +227,7 @@ export function ServicePlanTable({
                   <span className="text-xs text-muted-foreground">/mo</span>
                 </td>
                 <td className="py-3.5 pr-5 pl-4 text-right">
-                  {onDone && (state === 'pause' || state === 'resume') ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          disabled={pending}
-                          aria-label={`${service.name} actions`}
-                        >
-                          <MoreHorizontal aria-hidden />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="min-w-48">
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">
-                          {service.name}
-                        </DropdownMenuLabel>
-                        <DropdownMenuItem onSelect={() => onDone(row)}>
-                          <CircleCheck aria-hidden />
-                          {state === 'pause' ? 'Mark as paused' : 'Mark as resumed'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : null}
+                  <ServiceRowMenu row={row} onDone={onDone} pending={pending} />
                 </td>
               </tr>
             );

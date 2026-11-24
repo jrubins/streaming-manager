@@ -15,6 +15,8 @@ export const CatalogProviderSchema = z.object({
   plans: ProviderPlanSchema.array(),
   /** When the plan prices were last checked (YYYY-MM-DD), or null without known prices. */
   pricesAsOf: z.string().nullable(),
+  /** The service's own page for pausing, cancelling or resuming, when known. */
+  manageUrl: z.string().nullable(),
 });
 export type CatalogProvider = z.infer<typeof CatalogProviderSchema>;
 

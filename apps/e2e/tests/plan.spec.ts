@@ -58,6 +58,10 @@ test.describe('plan page', () => {
 
     // Marking a pause done updates the plan.
     await page.getByRole('button', { name: 'Hulu actions' }).click();
+    await expect(page.getByRole('menuitem', { name: 'Pause on hulu.com' })).toHaveAttribute(
+      'href',
+      'https://www.hulu.com/account',
+    );
     await expect(page.getByRole('menuitem', { name: 'Mark as paused' })).toBeVisible();
     // Let the menu finish fading in before the screenshot.
     await page
@@ -67,6 +71,14 @@ test.describe('plan page', () => {
     await page.getByRole('menuitem', { name: 'Mark as paused' }).click();
     await expect(card('Hulu').getByText('Stay paused', { exact: true })).toBeVisible();
     await expect(hero.getByText('$34.98')).toBeVisible();
+  });
+
+  test('links to a search for services without a known account page', async ({ page, api }) => {
+    await api.post('/services', { data: { providerKey: 'starz' } });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Starz actions' }).click();
+    const link = page.getByRole('menuitem', { name: 'Find how to pause Starz' });
+    await expect(link).toHaveAttribute('href', /google\.com\/search\?q=how\+to\+pause/);
   });
 
   test('shows the way in when the plan is empty', async ({ page, capture }) => {

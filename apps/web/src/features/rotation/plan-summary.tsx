@@ -23,7 +23,7 @@ export function PlanSummary({
   const saving = currentCostCents - plannedCostCents;
   return (
     <section aria-label="Monthly cost" className="space-y-2">
-      <dl className="grid divide-y rounded-2xl border border-border/70 bg-card shadow-[0_1px_2px_rgb(0_0_0/0.04)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <dl className="grid divide-y surface sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <Stat
           label="Paying now"
           value={formatPrice(currentCostCents)}

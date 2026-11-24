@@ -19,7 +19,7 @@ import { ApiRequestError } from '@/lib/api';
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   const id = `panel-${title.toLowerCase().replace(/\W+/g, '-')}`;
   return (
-    <section aria-labelledby={id} className="rounded-2xl border bg-card p-6 shadow-sm">
+    <section aria-labelledby={id} className="surface p-6">
       <h2 id={id} className="mb-4 font-semibold">
         {title}
       </h2>
