@@ -10,6 +10,13 @@ on:
     branches: [main]
     paths: ['infra/**', 'packages/db/migrations/**', '.github/workflows/infra.yml']
   workflow_dispatch:
+    inputs:
+      reimport_vercel_projects:
+        description: >-
+          Forget the two Vercel projects in the state so this run imports them again (see
+          infra/vercel-adopt.tf). For "Unexpected Identity Change" errors.
+        type: boolean
+        default: false
 
 concurrency:
   group: infra
@@ -87,6 +94,10 @@ jobs:
           aws s3api list-objects-v2 --bucket "$TF_STATE_BUCKET" --max-keys 1
           --endpoint-url "$AWS_ENDPOINT_URL_S3" --region auto > /dev/null
       - run: terraform init -backend-config="bucket=$TF_STATE_BUCKET"
+      # The projects themselves are untouched; the apply imports them again (vercel-adopt.tf).
+      - name: Forget the Vercel projects in the state
+        if: inputs.reimport_vercel_projects
+        run: terraform state rm vercel_project.web vercel_project.api
       - run: terraform apply -auto-approve
       - id: outputs
         run: echo "neon_project_id=$(terraform output -raw neon_project_id)" >> "$GITHUB_OUTPUT"
