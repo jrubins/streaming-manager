@@ -8,6 +8,7 @@ const meta = {
   component: ServicePlanTable,
   args: {
     plannedCostCents: 3098,
+    providerName: (key: string) => ({ netflix: 'Netflix', hulu: 'Hulu' })[key] ?? key,
     onDone: fn(),
     rows: [
       { service: SERVICES.max, state: 'resume', shows: [SHOWS.signal], coveredBy: [] },

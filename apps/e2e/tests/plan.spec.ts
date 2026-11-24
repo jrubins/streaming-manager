@@ -19,6 +19,8 @@ async function seedHousehold(api: APIRequestContext) {
   await service({ providerKey: 'disney-plus', status: 'paused' });
 
   await show(1001, 'tv'); // Netflix
+  await show(1011, 'tv'); // Netflix
+  await show(1012, 'movie'); // Netflix
   await show(1010, 'tv'); // Netflix or Hulu
   await show(1004, 'movie'); // Netflix or Peacock
   await show(1002, 'tv'); // HBO Max
@@ -42,7 +44,7 @@ test.describe('plan page', () => {
 
     const card = (name: string) => page.getByRole('row', { name, exact: true });
     await expect(card('Netflix').getByText('Keep')).toBeVisible();
-    await expect(card('Netflix').getByText('Needed for 3 titles on your list')).toBeVisible();
+    await expect(card('Netflix').getByText('Needed for 5 titles on your list')).toBeVisible();
     await expect(card('HBO Max').getByText('Resume', { exact: true })).toBeVisible();
     await expect(
       card('HBO Max').getByText('1 title waiting for it', { exact: false }),
@@ -55,6 +57,28 @@ test.describe('plan page', () => {
     await expect(page.getByText('Streams on Starz')).toBeVisible();
     await page.waitForLoadState('networkidle');
     await capture('plan');
+
+    // Hovering a title's poster names it; "+1" lists all of Netflix's titles.
+    const netflixTitles = page.getByRole('list', { name: 'Titles on Netflix' });
+    await netflixTitles.getByRole('button').first().hover();
+    await expect(page.getByRole('tooltip')).toContainText(/Series|Movie/);
+    await capture('plan-title-tooltip');
+    await netflixTitles.getByRole('button', { name: /show all 5 titles on Netflix/ }).click();
+    const dialog = page.getByRole('dialog', { name: 'Titles on Netflix' });
+    for (const title of [
+      'The Long Harbor',
+      'Lantern Season',
+      'Quarry Road',
+      'Harbor Lights',
+      'Northbound',
+    ]) {
+      await expect(dialog.getByText(title, { exact: true })).toBeVisible();
+    }
+    await expect(dialog.getByText('Also on Hulu')).toBeVisible();
+    await dialog.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await capture('plan-titles-dialog');
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
 
     // Marking a pause done updates the plan.
     await page.getByRole('button', { name: 'Hulu actions' }).click();

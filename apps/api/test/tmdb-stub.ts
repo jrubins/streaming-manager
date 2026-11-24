@@ -139,6 +139,24 @@ export const STUB_TITLES: readonly StubTitle[] = [
     color: '#334155',
     offers: { US: { flatrate: [8, 15] } },
   },
+  {
+    id: 1011,
+    mediaType: 'tv',
+    title: 'Lantern Season',
+    date: '2025-10-03',
+    overview: 'A night-market food stall becomes the center of a small-town election.',
+    color: '#92400e',
+    offers: { US: { flatrate: [8] } },
+  },
+  {
+    id: 1012,
+    mediaType: 'movie',
+    title: 'Quarry Road',
+    date: '2024-02-16',
+    overview: 'A retired geologist and her grandson chase a meteorite across the county.',
+    color: '#3f6212',
+    offers: { US: { flatrate: [8] } },
+  },
 ];
 
 const providerById = new Map(STUB_PROVIDERS.map((p) => [p.id, p]));
