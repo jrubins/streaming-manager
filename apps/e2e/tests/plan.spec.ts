@@ -35,8 +35,8 @@ test.describe('plan page', () => {
 
     await expect(page.getByRole('heading', { level: 1, name: "This month's plan" })).toBeVisible();
     const hero = page.getByRole('region', { name: 'Monthly cost' });
-    await expect(hero.getByText('Rotate this month and save')).toBeVisible();
-    await expect(hero.getByText('$16.49')).toBeVisible();
+    await expect(hero.getByText('$16.49/mo')).toBeVisible();
+    await expect(hero.getByText('$197.88 a year')).toBeVisible();
     await expect(hero.getByText('$47.47')).toBeVisible();
     await expect(hero.getByText('$30.98')).toBeVisible();
 
@@ -53,13 +53,12 @@ test.describe('plan page', () => {
     await expect(card('Peacock').getByText('Its title is also on Netflix')).toBeVisible();
     await expect(card('Disney+')).toBeVisible();
     await expect(page.getByText('Streams on Starz')).toBeVisible();
-    // The sidebar shows the saving and the counts.
-    await expect(page.getByText('Save $16.49')).toBeVisible();
     await page.waitForLoadState('networkidle');
     await capture('plan');
 
     // Marking a pause done updates the plan.
-    await page.getByRole('button', { name: "I've paused Hulu" }).click();
+    await page.getByRole('button', { name: 'Hulu actions' }).click();
+    await page.getByRole('menuitem', { name: 'Mark as paused' }).click();
     await expect(card('Hulu').getByText('Stay paused', { exact: true })).toBeVisible();
     await expect(hero.getByText('$34.98')).toBeVisible();
   });

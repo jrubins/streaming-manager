@@ -5,7 +5,7 @@ import { Clapperboard, Tv } from 'lucide-react';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { rotationQueryOptions } from '@/features/rotation/queries';
-import { SavingsHero } from '@/features/rotation/savings-hero';
+import { PlanSummary } from '@/features/rotation/plan-summary';
 import { ServicePlanTable } from '@/features/rotation/service-plan-table';
 import { UncoveredShows } from '@/features/rotation/uncovered-shows';
 import { providersQueryOptions, useUpdateService } from '@/features/services/queries';
@@ -69,7 +69,7 @@ export function PlanPage() {
         description="The fewest, cheapest services that cover everything left on your watchlist."
       />
 
-      <SavingsHero
+      <PlanSummary
         {...plan}
         activeCount={plan.entries.filter((e) => e.service.status === 'active').length}
         plannedCount={plan.entries.filter((e) => e.state === 'keep' || e.state === 'resume').length}

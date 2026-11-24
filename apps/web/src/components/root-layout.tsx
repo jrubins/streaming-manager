@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { householdQueryOptions } from '@/features/household/queries';
-import { rotationQueryOptions } from '@/features/rotation/queries';
 import { servicesQueryOptions } from '@/features/services/queries';
 import { watchlistQueryOptions } from '@/features/watchlist/queries';
 import { useSession } from '@/lib/session';
@@ -20,7 +19,6 @@ export function RootLayout() {
   const household = useQuery(householdQueryOptions);
   const watchlist = useQuery(watchlistQueryOptions);
   const services = useQuery(servicesQueryOptions);
-  const rotation = useQuery(rotationQueryOptions);
 
   return (
     <TooltipProvider>
@@ -30,9 +28,6 @@ export function RootLayout() {
           householdName={household.data?.name ?? null}
           toWatchCount={watchlist.data?.filter((show) => !show.watched).length ?? null}
           activeServiceCount={services.data?.filter((s) => s.status === 'active').length ?? null}
-          monthlySavingsCents={
-            rotation.data ? rotation.data.currentCostCents - rotation.data.plannedCostCents : null
-          }
           onSignOut={() => void signOut()}
         />
         <SidebarInset className="min-w-0">

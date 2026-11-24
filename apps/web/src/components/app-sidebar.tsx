@@ -14,7 +14,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { formatPrice } from '@/lib/format';
 import type { SessionUser } from '@/lib/session';
 
 export interface AppSidebarProps {
@@ -23,8 +22,6 @@ export interface AppSidebarProps {
   /** Unwatched titles and active services, for the nav badges. */
   toWatchCount: number | null;
   activeServiceCount: number | null;
-  /** What this month's plan saves (negative: it costs more), when known. */
-  monthlySavingsCents: number | null;
   onSignOut: () => void;
 }
 
@@ -45,7 +42,6 @@ export function AppSidebar({
   householdName,
   toWatchCount,
   activeServiceCount,
-  monthlySavingsCents,
   onSignOut,
 }: AppSidebarProps) {
   const badges: Partial<Record<(typeof NAV)[number]['to'], number | null>> = {
@@ -102,23 +98,6 @@ export function AppSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {monthlySavingsCents !== null && monthlySavingsCents > 0 ? (
-          <SidebarGroup className="mt-auto">
-            <Link
-              to="/"
-              className="block rounded-xl border border-sidebar-border bg-card p-4 transition-colors hover:bg-accent/50"
-            >
-              <span className="block text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                This month
-              </span>
-              <span className="mt-1 block text-lg font-semibold text-primary tabular-nums">
-                Save {formatPrice(monthlySavingsCents)}
-              </span>
-              <span className="block text-xs text-muted-foreground">by following your plan</span>
-            </Link>
-          </SidebarGroup>
-        ) : null}
       </SidebarContent>
 
       {user && displayName ? (

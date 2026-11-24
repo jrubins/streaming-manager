@@ -1,6 +1,13 @@
 import type { RotationState, Service, WatchlistShow } from '@app/shared';
 import { cn } from 'cn';
-import { Check, CircleCheck, CirclePause, CirclePlay, Moon } from 'lucide-react';
+import { Check, CircleCheck, CirclePause, CirclePlay, Moon, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { formatList, formatPrice } from '@/lib/format';
 import { Poster } from './poster-strip';
 import { ServiceLogo } from './service-logo';
@@ -158,25 +165,24 @@ export function ServicePlanTable({
                 </td>
                 <td className="py-3.5 pr-5 pl-4 text-right">
                   {onDone && (state === 'pause' || state === 'resume') ? (
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => onDone(row)}
-                      aria-label={
-                        state === 'pause'
-                          ? `I've paused ${service.name}`
-                          : `I've resumed ${service.name}`
-                      }
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50',
-                        state === 'pause'
-                          ? 'text-pause hover:bg-pause-soft'
-                          : 'text-resume hover:bg-resume-soft',
-                      )}
-                    >
-                      <CircleCheck className="size-4" aria-hidden />
-                      {state === 'pause' ? 'I paused it' : 'I resumed it'}
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          disabled={pending}
+                          aria-label={`${service.name} actions`}
+                        >
+                          <MoreHorizontal aria-hidden />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => onDone(row)}>
+                          <CircleCheck aria-hidden />
+                          {state === 'pause' ? 'Mark as paused' : 'Mark as resumed'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   ) : null}
                 </td>
               </tr>
