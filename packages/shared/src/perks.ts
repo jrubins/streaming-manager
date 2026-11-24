@@ -79,3 +79,23 @@ export function daysUntil(endsOn: string | null, today: string): number | null {
   if (endsOn === null) return null;
   return Math.round((Date.parse(endsOn) - Date.parse(today)) / 86_400_000);
 }
+
+/** The perk form, as typed: a price in dollars, and an optional last day. */
+export const PerkFormSchema = z.object({
+  via: z.string().trim().min(1, 'Say what it comes with, like Xfinity').max(100),
+  price: z
+    .string()
+    .trim()
+    .regex(/^\$?\d{1,4}(\.\d{1,2})?$/, 'Enter what you pay, like 0 or 9.99'),
+  endsOn: z.union([z.literal(''), z.iso.date('Pick a date')]),
+});
+export type PerkForm = z.infer<typeof PerkFormSchema>;
+
+/** A perk from the form's values. */
+export function perkFromForm(form: PerkForm): ServicePerk {
+  return {
+    via: form.via.trim(),
+    monthlyPriceCents: Math.round(Number(form.price.trim().replace(/^\$/, '')) * 100),
+    endsOn: form.endsOn === '' ? null : form.endsOn,
+  };
+}

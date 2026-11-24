@@ -98,7 +98,12 @@ function withMembershipPerks(
           ...base,
           name: `${base.name} (${offer.membershipName})`,
           monthlyPriceCents: offer.monthlyPriceCents,
-          perk: { offerId: offer.id, via: offer.membershipName, url: offer.url },
+          perk: {
+            offerId: offer.id,
+            via: offer.membershipName,
+            url: offer.url,
+            planName: base.name,
+          },
         },
       ];
     });

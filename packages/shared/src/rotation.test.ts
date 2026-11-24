@@ -336,7 +336,12 @@ describe('perks', () => {
   it('switches a paid service to a membership perk plan when that is cheaper', () => {
     const perkPlan = {
       ...plan('Premium (Walmart+)', 0, { ads: true }),
-      perk: { offerId: 'walmart-peacock', via: 'Walmart+', url: 'https://example.com' },
+      perk: {
+        offerId: 'walmart-peacock',
+        via: 'Walmart+',
+        url: 'https://example.com',
+        planName: 'Premium',
+      },
     };
     const withPerk = { ...PEACOCK, plans: [...PEACOCK.plans, perkPlan] };
     const result = optimizePlan({

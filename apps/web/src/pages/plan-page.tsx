@@ -1,4 +1,4 @@
-import type { RotationEntry } from '@app/shared';
+import { isoToday, type RotationEntry } from '@app/shared';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Clapperboard, Tv } from 'lucide-react';
@@ -6,6 +6,7 @@ import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { PreferencesSummary } from '@/features/preferences/preferences-summary';
 import { useUpdatePreferences } from '@/features/preferences/queries';
+import { PerksEnding } from '@/features/rotation/perks-ending';
 import { PlanAlternatives } from '@/features/rotation/plan-alternatives';
 import { PlanSummary } from '@/features/rotation/plan-summary';
 import { rotationQueryOptions } from '@/features/rotation/queries';
@@ -43,9 +44,22 @@ export function PlanPage() {
 
   /** Records the change the member made at the service. */
   function markDone(row: ServicePlanRow) {
-    const planName = row.planChange && row.plan ? { planName: row.plan.name } : {};
+    // A membership perk: record it on the service, on the plan the perk gives.
+    const perk = row.plan?.perk;
+    const planName = perk
+      ? {
+          planName: perk.planName,
+          perk: {
+            via: perk.via,
+            monthlyPriceCents: row.plan?.monthlyPriceCents ?? 0,
+            endsOn: null,
+          },
+        }
+      : row.planChange && row.plan
+        ? { planName: row.plan.name }
+        : {};
     if (row.state === 'subscribe') {
-      createService.mutate({ providerKey: row.offering.key, planName: row.plan?.name });
+      createService.mutate({ providerKey: row.offering.key, ...planName });
     } else if (row.service && row.state === 'pause') {
       updateService.mutate({ id: row.service.id, status: 'paused' });
     } else if (row.service && row.state === 'resume') {
@@ -89,6 +103,8 @@ export function PlanPage() {
         title="This month's plan"
         description="The cheapest set of plans that covers everything left on your watchlist."
       />
+
+      <PerksEnding entries={plan.entries} today={isoToday()} />
 
       <div className="space-y-3">
         <PlanSummary

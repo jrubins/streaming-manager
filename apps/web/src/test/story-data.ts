@@ -1,4 +1,6 @@
 import type {
+  Membership,
+  PerkOffer,
   CatalogProvider,
   HouseholdMember,
   ProviderPlan,
@@ -198,5 +200,48 @@ export const MEMBERS: HouseholdMember[] = [
     displayName: 'Sam Rivera',
     joinedAt: '2026-11-03T09:00:00.000Z',
     isYou: false,
+  },
+];
+
+export const MEMBERSHIPS: Membership[] = [
+  { key: 'xfinity', name: 'Xfinity', category: 'internet' },
+  { key: 't-mobile', name: 'T-Mobile', category: 'mobile' },
+  { key: 'walmart-plus', name: 'Walmart+', category: 'shopping' },
+  { key: 'amex-platinum', name: 'Amex Platinum', category: 'card' },
+];
+
+export const OFFERS: PerkOffer[] = [
+  {
+    id: 'xfinity-peacock',
+    membershipKey: 'xfinity',
+    membershipName: 'Xfinity',
+    providerKey: 'peacock',
+    providerName: 'Peacock',
+    planName: 'Premium',
+    monthlyPriceCents: 0,
+    summary: 'Peacock Premium is included with many Xfinity Internet and TV plans.',
+    url: 'https://example.com/xfinity',
+  },
+  {
+    id: 't-mobile-netflix',
+    membershipKey: 't-mobile',
+    membershipName: 'T-Mobile',
+    providerKey: 'netflix',
+    providerName: 'Netflix',
+    planName: 'Standard with ads',
+    monthlyPriceCents: 0,
+    summary: 'Netflix Standard with ads is included with some plans.',
+    url: 'https://example.com/t-mobile',
+  },
+  {
+    id: 'amex-platinum-peacock',
+    membershipKey: 'amex-platinum',
+    membershipName: 'Amex Platinum',
+    providerKey: 'peacock',
+    providerName: 'Peacock',
+    planName: null,
+    monthlyPriceCents: null,
+    summary: 'A monthly digital entertainment credit covers Peacock.',
+    url: 'https://example.com/amex',
   },
 ];
