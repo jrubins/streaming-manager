@@ -84,7 +84,7 @@ export function WatchlistPage() {
             type="search"
             aria-label="Search for a show or movie"
             placeholder="Search for a show or movie…"
-            className="h-11 pr-10 pl-9 text-base"
+            className="h-11 pr-10 pl-9 text-base [&::-webkit-search-cancel-button]:hidden"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {

@@ -70,9 +70,11 @@ export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const body = within(canvasElement.ownerDocument.body);
-    await expect(canvas.getByText('Switch plan')).toBeInTheDocument();
-    await expect(canvas.getByText('Same titles for $11.00 less')).toBeInTheDocument();
-    await expect(canvas.getByText('Includes Disney+, Hulu, and ESPN Select')).toBeInTheDocument();
+    // The table (wide screens); a hidden card list holds the same rows for phones.
+    const table = within(canvas.getByRole('table'));
+    await expect(table.getByText('Switch plan')).toBeInTheDocument();
+    await expect(table.getByText('Same titles for $11.00 less')).toBeInTheDocument();
+    await expect(table.getByText('Includes Disney+, Hulu, and ESPN Select')).toBeInTheDocument();
 
     await userEvent.click(
       canvas.getByRole('button', { name: 'Disney+, Hulu & ESPN Select actions' }),

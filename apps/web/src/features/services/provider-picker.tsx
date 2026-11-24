@@ -22,7 +22,7 @@ export function ProviderPicker({
     return <p className="text-sm text-muted-foreground">You've added every service available.</p>;
   }
   return (
-    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {providers.map((provider) => (
         <li key={provider.key}>
           <button

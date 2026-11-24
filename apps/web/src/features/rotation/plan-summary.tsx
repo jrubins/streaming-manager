@@ -63,12 +63,18 @@ function Stat({
   valueClassName?: string | undefined;
 }) {
   return (
-    <div className="px-6 py-5">
+    // A compact row on a phone (label left, amount right); a tile from tablet width up.
+    <div className="grid grid-cols-[1fr_auto] items-baseline gap-x-4 px-5 py-3 sm:block sm:px-6 sm:py-5">
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className={cn('mt-1 text-2xl font-semibold tracking-tight tabular-nums', valueClassName)}>
+      <dd
+        className={cn(
+          'text-right text-lg font-semibold tracking-tight tabular-nums sm:mt-1 sm:text-left sm:text-2xl',
+          valueClassName,
+        )}
+      >
         {value}
       </dd>
-      <dd className="text-xs text-muted-foreground">{note}</dd>
+      <dd className="col-span-2 text-xs text-muted-foreground sm:col-span-1">{note}</dd>
     </div>
   );
 }
