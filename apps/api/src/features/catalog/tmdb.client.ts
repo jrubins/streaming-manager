@@ -23,6 +23,8 @@ export interface TmdbTitle {
   year: number | null;
   posterPath: string | null;
   overview: string;
+  /** TMDB's popularity score (recent views, votes and watchlist adds); higher is more popular. */
+  popularity: number;
 }
 
 export interface TmdbTitleWithProviders extends TmdbTitle {
@@ -56,6 +58,7 @@ const SearchResult = z.object({
   first_air_date: z.string().optional(),
   poster_path: z.string().nullable().optional(),
   overview: z.string().optional(),
+  popularity: z.number().optional(),
 });
 
 const Offers = z.object({
@@ -79,6 +82,7 @@ function toTitle(row: z.infer<typeof SearchResult>, mediaType: MediaType): TmdbT
     year,
     posterPath: row.poster_path ?? null,
     overview: row.overview ?? '',
+    popularity: row.popularity ?? 0,
   };
 }
 

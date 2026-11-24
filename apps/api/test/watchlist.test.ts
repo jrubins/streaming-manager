@@ -45,13 +45,24 @@ describe('title search', () => {
       .set('Authorization', auth)
       .expect(200);
     const results = TitleSearchResultSchema.array().parse(res.body);
-    expect(results.map((r) => r.title)).toEqual(['The Long Harbor', 'Harbor Lights']);
-    expect(results[0]).toMatchObject({
+    // The more popular title first, whatever order TMDB returns them in.
+    expect(results.map((r) => r.title)).toEqual(['Harbor Lights', 'The Long Harbor']);
+    expect(results[1]).toMatchObject({
       tmdbId: 1001,
       mediaType: 'tv',
       year: 2024,
       posterUrl: 'https://images.tmdb.test/t/p/w342/poster/1001.svg',
     });
+  });
+
+  it('puts an exact title match first, then the most popular', async () => {
+    const res = await request(app)
+      .get('/catalog/search')
+      .query({ q: 'lanterns' })
+      .set('Authorization', await asNewUser())
+      .expect(200);
+    const results = TitleSearchResultSchema.array().parse(res.body);
+    expect(results.map((r) => r.title)).toEqual(['Lanterns', 'Paper Lanterns']);
   });
 
   it('answers 503 when TMDB is not configured', async () => {

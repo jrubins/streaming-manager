@@ -20,6 +20,8 @@ interface StubTitle {
   date: string;
   overview: string;
   color: string;
+  /** TMDB popularity score; search ranks by it. */
+  popularity: number;
   /** Region → provider ids by offer type. */
   offers: Record<string, { flatrate?: number[]; ads?: number[]; free?: number[]; rent?: number[] }>;
 }
@@ -52,6 +54,7 @@ const REGION_PROVIDERS: Record<string, number[]> = {
 export const STUB_TITLES: readonly StubTitle[] = [
   {
     id: 1001,
+    popularity: 40,
     mediaType: 'tv',
     title: 'The Long Harbor',
     date: '2024-03-14',
@@ -61,6 +64,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1002,
+    popularity: 72,
     mediaType: 'tv',
     title: 'Signal Fires',
     date: '2025-09-02',
@@ -70,6 +74,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1003,
+    popularity: 55,
     mediaType: 'tv',
     title: 'Copper & Thyme',
     date: '2023-05-20',
@@ -79,6 +84,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1004,
+    popularity: 33,
     mediaType: 'movie',
     title: 'Northbound',
     date: '2025-11-07',
@@ -88,6 +94,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1005,
+    popularity: 90,
     mediaType: 'tv',
     title: 'Glass Orchard',
     date: '2026-02-11',
@@ -97,6 +104,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1006,
+    popularity: 12,
     mediaType: 'movie',
     title: 'The Quiet Meridian',
     date: '2022-08-19',
@@ -106,6 +114,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1007,
+    popularity: 25,
     mediaType: 'tv',
     title: 'Saltwater Kings',
     date: '2024-06-30',
@@ -115,6 +124,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1008,
+    popularity: 60,
     mediaType: 'movie',
     title: 'Paper Lanterns',
     date: '2021-10-01',
@@ -124,6 +134,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1009,
+    popularity: 48,
     mediaType: 'tv',
     title: 'Static Bloom',
     date: '2026-01-09',
@@ -133,6 +144,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1010,
+    popularity: 85,
     mediaType: 'tv',
     title: 'Harbor Lights',
     date: '2019-04-04',
@@ -142,6 +154,7 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1011,
+    popularity: 30,
     mediaType: 'tv',
     title: 'Lantern Season',
     date: '2025-10-03',
@@ -151,12 +164,23 @@ export const STUB_TITLES: readonly StubTitle[] = [
   },
   {
     id: 1012,
+    popularity: 20,
     mediaType: 'movie',
     title: 'Quarry Road',
     date: '2024-02-16',
     overview: 'A retired geologist and her grandson chase a meteorite across the county.',
     color: '#3f6212',
     offers: { US: { flatrate: [8] } },
+  },
+  {
+    id: 1013,
+    popularity: 2,
+    mediaType: 'movie',
+    title: 'Lanterns',
+    date: '2009-07-24',
+    overview: 'An obscure documentary about lighthouse lamps.',
+    color: '#57534e',
+    offers: { US: { rent: [9] } },
   },
 ];
 
@@ -251,7 +275,10 @@ export function createTmdbStub(): TmdbStub {
             : { title: t.title, release_date: t.date }),
           poster_path: `/poster/${t.id}.svg`,
           overview: t.overview,
-        }));
+          popularity: t.popularity,
+        }))
+        // TMDB orders by text relevance, not popularity: keep that unhelpful order here.
+        .sort((a, b) => a.id - b.id);
       // People show up in multi-search too; the client must skip them.
       return json({
         page: 1,
