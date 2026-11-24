@@ -1,5 +1,10 @@
-import { CatalogProviderSchema, ServiceSchema, type UpdateService } from '@app/shared';
-import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  CatalogProviderSchema,
+  ServiceSchema,
+  type CreateService,
+  type UpdateService,
+} from '@app/shared';
+import { queryOptions, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
 
 export const servicesQueryOptions = queryOptions({
@@ -14,6 +19,23 @@ export const providersQueryOptions = queryOptions({
   staleTime: 60 * 60 * 1000,
 });
 
+/** Services feed the plan, so both refresh after a change. */
+function invalidate(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: servicesQueryOptions.queryKey }),
+    queryClient.invalidateQueries({ queryKey: ['rotation'] }),
+  ]);
+}
+
+export function useCreateService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateService) =>
+      apiRequest('/services', ServiceSchema, { method: 'POST', body: JSON.stringify(input) }),
+    onSuccess: () => invalidate(queryClient),
+  });
+}
+
 export function useUpdateService() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -22,11 +44,14 @@ export function useUpdateService() {
         method: 'PATCH',
         body: JSON.stringify(changes),
       }),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: servicesQueryOptions.queryKey }),
-        queryClient.invalidateQueries({ queryKey: ['rotation'] }),
-      ]);
-    },
+    onSuccess: () => invalidate(queryClient),
+  });
+}
+
+export function useDeleteService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiRequest(`/services/${id}`, null, { method: 'DELETE' }),
+    onSuccess: () => invalidate(queryClient),
   });
 }

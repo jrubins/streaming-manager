@@ -56,7 +56,12 @@ export const test = base.extend<Fixtures & Options>({
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(`page error: ${error.message}`));
     page.on('console', (message) => {
-      if (message.type() === 'error') errors.push(`console error: ${message.text()}`);
+      if (message.type() !== 'error') return;
+      // Chrome logs every 4xx response. An API client error (e.g. a wrong invite code) is
+      // expected behaviour the UI shows and tests assert on; server errors still fail.
+      const apiClientError =
+        /status of 4\d\d/.test(message.text()) && message.location().url.includes('/api/');
+      if (!apiClientError) errors.push(`console error: ${message.text()}`);
     });
     await use(page);
     expect(errors, 'the browser reported errors').toEqual([]);
@@ -67,7 +72,13 @@ export const test = base.extend<Fixtures & Options>({
     mkdirSync(dir, { recursive: true });
     await use(async (name: string) => {
       const file = path.join(dir, `${name}.png`);
-      await page.screenshot({ path: file, fullPage: true });
+      // Grow the viewport to the whole page rather than using `fullPage`, so fixed elements
+      // (the sidebar) span the full height of the screenshot.
+      const viewport = page.viewportSize();
+      const height = await page.evaluate(() => document.documentElement.scrollHeight);
+      if (viewport) await page.setViewportSize({ width: viewport.width, height });
+      await page.screenshot({ path: file });
+      if (viewport) await page.setViewportSize(viewport);
       await testInfo.attach(name, { path: file, contentType: 'image/png' });
     });
   },

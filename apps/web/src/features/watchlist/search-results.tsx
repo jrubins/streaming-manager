@@ -1,0 +1,58 @@
+import type { TitleSearchResult } from '@app/shared';
+import { Check, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { titleKey } from './title-key';
+
+interface SearchResultsProps {
+  results: readonly TitleSearchResult[];
+  /** `${mediaType}:${tmdbId}` of titles already on the list. */
+  added: ReadonlySet<string>;
+  onAdd: (result: TitleSearchResult) => void;
+  /** The title being added right now, if any. */
+  adding?: string | null;
+}
+
+/** TMDB search results, each addable to the watchlist. */
+export function SearchResults({ results, added, onAdd, adding = null }: SearchResultsProps) {
+  if (results.length === 0) {
+    return <p className="px-1 py-4 text-sm text-muted-foreground">No titles found.</p>;
+  }
+  return (
+    <ul className="grid gap-2 sm:grid-cols-2" aria-label="Search results">
+      {results.map((result) => {
+        const key = titleKey(result);
+        const isAdded = added.has(key);
+        return (
+          <li key={key} className="flex items-center gap-3 rounded-xl border bg-card p-2.5">
+            {result.posterUrl ? (
+              <img
+                src={result.posterUrl}
+                alt=""
+                className="aspect-[2/3] w-11 shrink-0 rounded-md object-cover"
+              />
+            ) : (
+              <span aria-hidden className="aspect-[2/3] w-11 shrink-0 rounded-md bg-muted" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium">{result.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {result.mediaType === 'tv' ? 'TV series' : 'Movie'}
+                {result.year ? ` · ${result.year}` : ''}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant={isAdded ? 'ghost' : 'secondary'}
+              disabled={isAdded || adding === key}
+              onClick={() => onAdd(result)}
+              aria-label={isAdded ? `${result.title} is on your list` : `Add ${result.title}`}
+            >
+              {isAdded ? <Check aria-hidden /> : <Plus aria-hidden />}
+              {isAdded ? 'Added' : 'Add'}
+            </Button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

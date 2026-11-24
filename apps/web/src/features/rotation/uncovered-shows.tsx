@@ -11,10 +11,13 @@ interface UncoveredShowsProps {
 /** Titles on the list that none of the household's services carry. */
 export function UncoveredShows({ shows, providerName }: UncoveredShowsProps) {
   return (
-    <ul className="grid gap-3 sm:grid-cols-2">
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {shows.map((show) => (
-        <li key={show.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-          <Poster show={show} className="w-12" />
+        <li
+          key={show.id}
+          className="flex items-center gap-4 rounded-2xl border border-dashed bg-card/60 p-3"
+        >
+          <Poster show={show} className="w-14" />
           <div className="min-w-0">
             <p className="truncate font-medium">{show.title}</p>
             <p className="text-sm text-muted-foreground">

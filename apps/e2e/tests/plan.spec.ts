@@ -33,33 +33,43 @@ test.describe('plan page', () => {
     await seedHousehold(api);
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { level: 1, name: /plan$/ })).toBeVisible();
-    const summary = page.getByRole('region', { name: 'Monthly cost' });
-    await expect(summary.getByText('$47.47')).toBeVisible();
-    await expect(summary.getByText('$30.98')).toBeVisible();
-    await expect(summary.getByText('$16.49/mo')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: "This month's plan" })).toBeVisible();
+    const hero = page.getByRole('region', { name: 'Monthly cost' });
+    await expect(hero.getByText('Rotate this month and save')).toBeVisible();
+    await expect(hero.getByText('$16.49')).toBeVisible();
+    await expect(hero.getByText('$47.47')).toBeVisible();
+    await expect(hero.getByText('$30.98')).toBeVisible();
 
     const card = (name: string) => page.getByRole('article', { name });
     await expect(card('Netflix').getByText('Keep')).toBeVisible();
+    await expect(card('Netflix').getByText('Needed for 3 titles on your list')).toBeVisible();
     await expect(card('HBO Max').getByText('Resume', { exact: true })).toBeVisible();
+    await expect(
+      card('HBO Max').getByText('1 title waiting for it', { exact: false }),
+    ).toBeVisible();
     await expect(card('Hulu').getByText('Its title is also on Netflix')).toBeVisible();
     await expect(card('Apple TV+').getByText('Nothing on your list streams here')).toBeVisible();
-    await expect(card('Peacock').getByText('Paused', { exact: true })).toBeVisible();
+    await expect(card('Peacock').getByText('Stay paused', { exact: true })).toBeVisible();
     await expect(card('Peacock').getByText('Its title is also on Netflix')).toBeVisible();
     await expect(card('Disney+')).toBeVisible();
-    await expect(page.getByText('The Quiet Meridian')).toBeVisible();
     await expect(page.getByText('Streams on Starz')).toBeVisible();
+    // The sidebar shows the saving and the counts.
+    await expect(page.getByText('Save $16.49')).toBeVisible();
     await page.waitForLoadState('networkidle');
     await capture('plan');
 
-    // Marking a pause as done moves the service to "Stay paused".
+    // Marking a pause done updates the plan.
     await page.getByRole('button', { name: "I've paused Hulu" }).click();
-    await expect(card('Hulu').getByText('Paused', { exact: true })).toBeVisible();
-    await expect(summary.getByText('$34.98')).toBeVisible();
+    await expect(card('Hulu').getByText('Stay paused', { exact: true })).toBeVisible();
+    await expect(hero.getByText('$34.98')).toBeVisible();
   });
 
-  test('explains what to do with an empty plan', async ({ page }) => {
+  test('shows the way in when the plan is empty', async ({ page, capture }) => {
     await page.goto('/');
-    await expect(page.getByText('Add the streaming services you have')).toBeVisible();
+    await expect(page.getByText("Let's build your first rotation")).toBeVisible();
+    await page.getByRole('link', { name: 'Add your services' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Services' })).toBeVisible();
+    await page.goto('/');
+    await capture('plan-empty');
   });
 });
