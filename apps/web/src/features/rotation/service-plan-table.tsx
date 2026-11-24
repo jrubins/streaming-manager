@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { formatList, formatPrice } from '@/lib/format';
@@ -176,7 +177,10 @@ export function ServicePlanTable({
                           <MoreHorizontal aria-hidden />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="min-w-48">
+                        <DropdownMenuLabel className="text-xs text-muted-foreground">
+                          {service.name}
+                        </DropdownMenuLabel>
                         <DropdownMenuItem onSelect={() => onDone(row)}>
                           <CircleCheck aria-hidden />
                           {state === 'pause' ? 'Mark as paused' : 'Mark as resumed'}
