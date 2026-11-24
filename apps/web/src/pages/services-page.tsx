@@ -102,7 +102,7 @@ export function ServicesPage() {
       />
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="yours">Your services ({services.length})</TabsTrigger>
           <TabsTrigger value="add">Add a service</TabsTrigger>
           <TabsTrigger value="bundles">Bundles</TabsTrigger>
