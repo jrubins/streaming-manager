@@ -10,7 +10,7 @@ import type { ComponentType } from 'react';
 /** Renders a story inside a router (at "/"), for components that use `Link`. */
 export function RouterDecorator(Story: ComponentType) {
   const rootRoute = createRootRoute();
-  const paths = ['/', '/watchlist', '/services', '/household'];
+  const paths = ['/', '/watchlist', '/services', '/preferences', '/household'];
   const routeTree = rootRoute.addChildren(
     paths.map((path) =>
       createRoute({ getParentRoute: () => rootRoute, path, component: () => <Story /> }),

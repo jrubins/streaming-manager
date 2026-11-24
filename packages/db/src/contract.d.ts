@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'2a05321a727abc4e4171019eeaff87c4011a4167d6fdadf0f35184c0307d836b'>;
+  StorageHashBase<'3fa41ba7d8d8b75f5f46f74be4237ffa7f75728a23a8a27317a5a0c75be3c057'>;
 export type ExecutionHash =
   ExecutionHashBase<'c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606'>;
 export type ProfileHash =
@@ -344,11 +344,16 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
 
 export namespace Models {
   export type public_Household = {
+    allowAds: FieldOutputTypes['public']['Household']['allowAds'];
     createdAt: FieldOutputTypes['public']['Household']['createdAt'];
     id: FieldOutputTypes['public']['Household']['id'];
     inviteCode: FieldOutputTypes['public']['Household']['inviteCode'];
+    minStreams: FieldOutputTypes['public']['Household']['minStreams'];
     name: FieldOutputTypes['public']['Household']['name'];
     region: FieldOutputTypes['public']['Household']['region'];
+    require4k: FieldOutputTypes['public']['Household']['require4k'];
+    requireDownloads: FieldOutputTypes['public']['Household']['requireDownloads'];
+    suggestNewServices: FieldOutputTypes['public']['Household']['suggestNewServices'];
     updatedAt: FieldOutputTypes['public']['Household']['updatedAt'];
     members: public_HouseholdMember[];
     services: public_Service[];
@@ -427,6 +432,16 @@ type ContractBase = Omit<
           readonly table: {
             readonly Household: {
               columns: {
+                readonly allowAds: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                  readonly many: false;
+                };
                 readonly createdAt: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-date@1';
@@ -451,6 +466,16 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly minStreams: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 1>;
+                  };
+                  readonly many: false;
+                };
                 readonly name: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -464,6 +489,36 @@ type ContractBase = Omit<
                   readonly default: {
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/text@1', 'US'>;
+                  };
+                  readonly many: false;
+                };
+                readonly require4k: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly requireDownloads: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly suggestNewServices: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
                   };
                   readonly many: false;
                 };
@@ -815,6 +870,10 @@ type ContractBase = Omit<
         readonly models: {
           readonly Household: {
             readonly fields: {
+              readonly allowAds: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -831,6 +890,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly minStreams: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly name: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -838,6 +901,18 @@ type ContractBase = Omit<
               readonly region: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly require4k: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly requireDownloads: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly suggestNewServices: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
               readonly updatedAt: {
                 readonly nullable: false;
@@ -887,11 +962,16 @@ type ContractBase = Omit<
               readonly table: 'Household';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly allowAds: { readonly column: 'allowAds' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly inviteCode: { readonly column: 'inviteCode' };
+                readonly minStreams: { readonly column: 'minStreams' };
                 readonly name: { readonly column: 'name' };
                 readonly region: { readonly column: 'region' };
+                readonly require4k: { readonly column: 'require4k' };
+                readonly requireDownloads: { readonly column: 'requireDownloads' };
+                readonly suggestNewServices: { readonly column: 'suggestNewServices' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };

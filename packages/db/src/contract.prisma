@@ -30,6 +30,12 @@ model Household {
   region     String             @default("US")
   // Shared with people who should join this household.
   inviteCode String             @unique
+  // Preferences: the plan is the cheapest set of plans that meets them.
+  allowAds           Boolean    @default(true)
+  minStreams         Int        @default(1)
+  require4k          Boolean    @default(false)
+  requireDownloads   Boolean    @default(false)
+  suggestNewServices Boolean    @default(true)
   createdAt  DateTime           @default(now()) @onCreate(now())
   updatedAt  temporal.UpdatedAt
   members    HouseholdMember[]
@@ -48,12 +54,13 @@ model HouseholdMember {
   @@index([householdId, joinedAt])
 }
 
-// A streaming service the household subscribes to, active or paused.
+// A streaming service (or bundle of services) the household subscribes to, active or paused.
 model Service {
   id                Int                @id @default(autoincrement())
   householdId       Int
   household         Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  // Normalized provider key, e.g. "netflix" (see apps/api/src/features/catalog).
+  // Catalog key: a normalized provider key ("netflix") or a bundle's key (see
+  // apps/api/src/features/catalog).
   providerKey       String
   name              String
   logoPath          String?

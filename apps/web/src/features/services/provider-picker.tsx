@@ -1,16 +1,23 @@
 import type { CatalogProvider } from '@app/shared';
 import { Plus } from 'lucide-react';
 import { ServiceLogo } from '@/features/rotation/service-logo';
-import { formatPrice } from '@/lib/format';
+import { formatList, formatPrice } from '@/lib/format';
 
 interface ProviderPickerProps {
   providers: readonly CatalogProvider[];
   onAdd: (provider: CatalogProvider) => void;
+  /** Provider key → display name, for what a bundle includes. */
+  providerName: (key: string) => string;
   pending?: boolean;
 }
 
 /** Services available in the household's region, to add with one click. */
-export function ProviderPicker({ providers, onAdd, pending = false }: ProviderPickerProps) {
+export function ProviderPicker({
+  providers,
+  onAdd,
+  providerName,
+  pending = false,
+}: ProviderPickerProps) {
   if (providers.length === 0) {
     return <p className="text-sm text-muted-foreground">You've added every service available.</p>;
   }
@@ -30,6 +37,11 @@ export function ProviderPicker({ providers, onAdd, pending = false }: ProviderPi
                 <span className="sr-only">Add </span>
                 {provider.name}
               </span>
+              {provider.kind === 'bundle' ? (
+                <span className="block truncate text-xs text-muted-foreground">
+                  {formatList(provider.includes.map(providerName))}
+                </span>
+              ) : null}
               <span className="block text-xs text-muted-foreground">
                 {provider.plans[0]
                   ? `from ${formatPrice(provider.plans[0].monthlyPriceCents)}`

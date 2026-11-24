@@ -39,6 +39,7 @@ const DISPLAY_NAMES: Readonly<Record<string, string>> = {
   'amazon-prime-video': 'Prime Video',
   'apple-tv-plus': 'Apple TV+',
   'disney-plus': 'Disney+',
+  'espn-plus': 'ESPN+',
   'hbo-max': 'HBO Max',
   'mgm-plus': 'MGM+',
   'amc-plus': 'AMC+',

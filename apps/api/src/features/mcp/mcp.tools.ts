@@ -2,11 +2,13 @@ import {
   AddToWatchlistSchema,
   CatalogProviderSchema,
   CreateServiceSchema,
+  PreferencesSchema,
   RotationPlanSchema,
   ServiceIdParamsSchema,
   ServiceSchema,
   TitleSearchQuerySchema,
   TitleSearchResultSchema,
+  UpdatePreferencesSchema,
   UpdateServiceSchema,
   UpdateWatchlistShowSchema,
   WatchlistShowIdParamsSchema,
@@ -48,14 +50,39 @@ export function createMcpServer(services: McpServices, userId: string): McpServe
     {
       title: 'Get rotation plan',
       description:
-        "This month's plan for the household's streaming services: each service is keep (active " +
-        'and needed), pause (active, not needed: the savings), resume (paused, but needed) or ' +
-        'paused. The plan uses the fewest, then cheapest, services that carry every unwatched ' +
-        'title. Costs are in cents per month.',
+        "This month's plan: the cheapest set of subscriptions (services or bundles), each on " +
+        "its cheapest plan that meets the household's preferences, that carries every unwatched " +
+        'title. Each entry is keep, pause, resume, paused or subscribe (not subscribed yet), ' +
+        'with planChange when it should switch plan. Alternatives show the cost under other ' +
+        'preferences (e.g. no ads). Costs are in cents per month.',
       outputSchema: RotationPlanSchema,
       annotations: { readOnlyHint: true },
     },
     async () => result(await services.rotation.plan(userId)),
+  );
+
+  server.registerTool(
+    'get_preferences',
+    {
+      title: 'Get preferences',
+      description:
+        'What the household needs from its plans: ads allowed, screens at once, 4K, downloads, ' +
+        "and whether to suggest services it doesn't have.",
+      outputSchema: PreferencesSchema,
+      annotations: { readOnlyHint: true },
+    },
+    async () => result(await services.households.preferences(userId)),
+  );
+
+  server.registerTool(
+    'update_preferences',
+    {
+      title: 'Update preferences',
+      description: 'Change what the household needs from its plans; the plan follows.',
+      inputSchema: UpdatePreferencesSchema,
+      outputSchema: PreferencesSchema,
+    },
+    async (input) => result(await services.households.updatePreferences(userId, input)),
   );
 
   server.registerTool(
@@ -134,7 +161,8 @@ export function createMcpServer(services: McpServices, userId: string): McpServe
     {
       title: 'List available services',
       description:
-        "Streaming services in the household's region that can be added, with known plan prices.",
+        "Streaming services and bundles in the household's region that can be added, with " +
+        'known plans (price, ads, screens, 4K, downloads).',
       outputSchema: z.object({ providers: CatalogProviderSchema.array() }),
       annotations: { readOnlyHint: true },
     },
@@ -146,7 +174,7 @@ export function createMcpServer(services: McpServices, userId: string): McpServe
     {
       title: 'Add service',
       description:
-        'Add a streaming service by provider key (from list_available_services). Without a ' +
+        'Add a streaming service or bundle by key (from list_available_services). Without a ' +
         "price, the named plan's (or the cheapest plan's) published price is used.",
       inputSchema: CreateServiceSchema,
       outputSchema: ServiceSchema,

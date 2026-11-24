@@ -34,11 +34,46 @@ describe('catalog providers', () => {
     expect(keys.filter((key) => key === 'hbo-max')).toHaveLength(1);
     const netflix = providers.find((p) => p.key === 'netflix');
     expect(netflix).toMatchObject({ name: 'Netflix', pricesAsOf: '2026-11-24' });
-    expect(netflix?.plans[0]).toEqual({ name: 'Standard with ads', monthlyPriceCents: 899 });
+    expect(netflix?.plans[0]).toEqual({
+      name: 'Standard with ads',
+      monthlyPriceCents: 899,
+      ads: true,
+      streams: 2,
+      uhd: false,
+      downloads: true,
+    });
+    expect(netflix).toMatchObject({ kind: 'service', includes: ['netflix'] });
     expect(netflix?.logoUrl).toBe('https://images.tmdb.test/t/p/w92/logo/netflix.svg');
     const firstUnpriced = providers.findIndex((p) => p.plans.length === 0);
     expect(providers.slice(firstUnpriced).every((p) => p.plans.length === 0)).toBe(true);
     expect(keys).toContain('crunchyroll');
+  });
+});
+
+describe('bundles', () => {
+  it('offers bundles whose services all stream in the region', async () => {
+    const auth = await asNewUser();
+    const res = await request(app).get('/catalog/providers').set('Authorization', auth).expect(200);
+    const bundle = CatalogProviderSchema.array()
+      .parse(res.body)
+      .find((p) => p.key === 'disney-hulu-espn-select');
+    expect(bundle).toMatchObject({
+      kind: 'bundle',
+      name: 'Disney+, Hulu & ESPN Select',
+      includes: ['disney-plus', 'hulu', 'espn-plus'],
+      manageUrl: 'https://www.disneyplus.com/account',
+    });
+    expect(bundle?.plans.map((p) => p.monthlyPriceCents)).toEqual([2199, 3299]);
+  });
+
+  it('adds a bundle as one subscription that includes its services', async () => {
+    const auth = await asNewUser();
+    expect(await addService(auth, { providerKey: 'disney-hulu-espn-select' })).toMatchObject({
+      name: 'Disney+, Hulu & ESPN Select',
+      includes: ['disney-plus', 'hulu', 'espn-plus'],
+      planName: 'With ads',
+      monthlyPriceCents: 2199,
+    });
   });
 });
 

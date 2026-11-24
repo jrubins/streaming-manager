@@ -1,4 +1,11 @@
-import { ApiErrorSchema, HouseholdSchema, ServiceSchema, type Household } from '@app/shared';
+import {
+  ApiErrorSchema,
+  DEFAULT_PREFERENCES,
+  HouseholdSchema,
+  PreferencesSchema,
+  ServiceSchema,
+  type Household,
+} from '@app/shared';
 import request from 'supertest';
 import { afterAll, describe, expect, it } from 'vitest';
 import { bearer, createTestApp, unique, uniqueUserId } from './helpers.ts';
@@ -48,6 +55,36 @@ describe('household API', () => {
       .expect(200);
 
     expect(HouseholdSchema.parse(res.body)).toMatchObject({ name, region: 'CA' });
+  });
+
+  it('has default preferences, and updates some of them', async () => {
+    const { auth } = await asNewUser();
+    const initial = await request(app)
+      .get('/household/preferences')
+      .set('Authorization', auth)
+      .expect(200);
+    expect(PreferencesSchema.parse(initial.body)).toEqual(DEFAULT_PREFERENCES);
+
+    const res = await request(app)
+      .patch('/household/preferences')
+      .set('Authorization', auth)
+      .send({ allowAds: false, minStreams: 3 })
+      .expect(200);
+    expect(PreferencesSchema.parse(res.body)).toEqual({
+      ...DEFAULT_PREFERENCES,
+      allowAds: false,
+      minStreams: 3,
+    });
+  });
+
+  it('rejects invalid preferences', async () => {
+    const { auth } = await asNewUser();
+    const res = await request(app)
+      .patch('/household/preferences')
+      .set('Authorization', auth)
+      .send({ minStreams: 0 })
+      .expect(400);
+    expect(ApiErrorSchema.parse(res.body).error.code).toBe('validation_error');
   });
 
   it('rejects an invalid region', async () => {

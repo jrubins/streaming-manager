@@ -1,6 +1,13 @@
 import { randomBytes } from 'node:crypto';
 import type { Db } from '@app/db';
-import type { Household, HouseholdMember, JoinHousehold, UpdateHousehold } from '@app/shared';
+import type {
+  Household,
+  HouseholdMember,
+  JoinHousehold,
+  Preferences,
+  UpdateHousehold,
+  UpdatePreferences,
+} from '@app/shared';
 import { isUniqueViolation } from '../../lib/db-errors.ts';
 import { HttpError, notFound } from '../../lib/http-error.ts';
 
@@ -82,6 +89,18 @@ export function createHouseholdService(db: Db) {
     if (!remaining) await Household.where({ id: householdId }).delete();
   }
 
+  async function readPreferences(householdId: number): Promise<Preferences> {
+    const household = await Household.where({ id: householdId }).first();
+    if (!household) throw notFound('Household not found');
+    return {
+      allowAds: household.allowAds,
+      minStreams: household.minStreams,
+      require4k: household.require4k,
+      requireDownloads: household.requireDownloads,
+      suggestNewServices: household.suggestNewServices,
+    };
+  }
+
   return {
     /** The acting user's household (created on first use). */
     async context(userId: string): Promise<HouseholdContext> {
@@ -123,6 +142,20 @@ export function createHouseholdService(db: Db) {
       await removeIfEmpty(member.householdId);
       const fresh = await membership(userId, member.displayName);
       return load(userId, fresh.householdId);
+    },
+
+    /** What the household needs from its plans. */
+    async preferences(userId: string): Promise<Preferences> {
+      const member = await membership(userId);
+      return readPreferences(member.householdId);
+    },
+
+    async updatePreferences(userId: string, input: UpdatePreferences): Promise<Preferences> {
+      const member = await membership(userId);
+      if (Object.keys(input).length > 0) {
+        await Household.where({ id: member.householdId }).update(input);
+      }
+      return readPreferences(member.householdId);
     },
 
     /** Replaces the invite code, so the old one stops working. */

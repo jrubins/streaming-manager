@@ -1,3 +1,4 @@
+import type { CatalogProvider } from '@app/shared';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { ProviderPicker } from '@/features/services/provider-picker';
@@ -20,6 +21,10 @@ export function ServicesPage() {
   const active = services.filter((s) => s.status === 'active');
   const have = new Set(services.map((s) => s.providerKey));
   const available = (providers.data ?? []).filter((p) => !have.has(p.key));
+  const providerName = (key: string) =>
+    providers.data?.find((p) => p.key === key)?.name ??
+    key.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const addService = (provider: CatalogProvider) => create.mutate({ providerKey: provider.key });
 
   return (
     <>
@@ -42,6 +47,7 @@ export function ServicesPage() {
           <ServicesTable
             services={services}
             plansFor={(key) => providers.data?.find((p) => p.key === key)?.plans ?? []}
+            providerName={providerName}
             pending={update.isPending || remove.isPending}
             onChange={(service, changes) => update.mutate({ id: service.id, ...changes })}
             onRemove={(service) => remove.mutate(service.id)}
@@ -64,11 +70,25 @@ export function ServicesPage() {
         ) : providers.isError ? (
           <p className="text-sm text-destructive">Couldn't load the services in your region.</p>
         ) : (
-          <ProviderPicker
-            providers={available}
-            pending={create.isPending}
-            onAdd={(provider) => create.mutate({ providerKey: provider.key })}
-          />
+          <div className="space-y-6">
+            <ProviderPicker
+              providers={available.filter((p) => p.kind === 'service')}
+              providerName={providerName}
+              pending={create.isPending}
+              onAdd={addService}
+            />
+            {available.some((p) => p.kind === 'bundle') ? (
+              <div>
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Bundles</h3>
+                <ProviderPicker
+                  providers={available.filter((p) => p.kind === 'bundle')}
+                  providerName={providerName}
+                  pending={create.isPending}
+                  onAdd={addService}
+                />
+              </div>
+            ) : null}
+          </div>
         )}
       </section>
     </>

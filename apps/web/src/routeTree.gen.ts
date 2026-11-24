@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HouseholdRouteImport } from './routes/household'
+import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const HouseholdRoute = HouseholdRouteImport.update({
   id: '/household',
   path: '/household',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreferencesRoute = PreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -38,12 +44,14 @@ const WatchlistRoute = WatchlistRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/household': typeof HouseholdRoute
+  '/preferences': typeof PreferencesRoute
   '/services': typeof ServicesRoute
   '/watchlist': typeof WatchlistRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/household': typeof HouseholdRoute
+  '/preferences': typeof PreferencesRoute
   '/services': typeof ServicesRoute
   '/watchlist': typeof WatchlistRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/household': typeof HouseholdRoute
+  '/preferences': typeof PreferencesRoute
   '/services': typeof ServicesRoute
   '/watchlist': typeof WatchlistRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/household' | '/services' | '/watchlist'
+  fullPaths: '/' | '/household' | '/preferences' | '/services' | '/watchlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/household' | '/services' | '/watchlist'
-  id: '__root__' | '/' | '/household' | '/services' | '/watchlist'
+  to: '/' | '/household' | '/preferences' | '/services' | '/watchlist'
+  id:
+    | '__root__'
+    | '/'
+    | '/household'
+    | '/preferences'
+    | '/services'
+    | '/watchlist'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HouseholdRoute: typeof HouseholdRoute
+  PreferencesRoute: typeof PreferencesRoute
   ServicesRoute: typeof ServicesRoute
   WatchlistRoute: typeof WatchlistRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/household'
       fullPath: '/household'
       preLoaderRoute: typeof HouseholdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preferences': {
+      id: '/preferences'
+      path: '/preferences'
+      fullPath: '/preferences'
+      preLoaderRoute: typeof PreferencesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HouseholdRoute: HouseholdRoute,
+  PreferencesRoute: PreferencesRoute,
   ServicesRoute: ServicesRoute,
   WatchlistRoute: WatchlistRoute,
 }

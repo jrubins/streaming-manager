@@ -1,42 +1,106 @@
-import type { CatalogProvider, ProviderPlan, Region, TitleSearchResult } from '@app/shared';
+import type {
+  CatalogProvider,
+  OfferingKind,
+  ProviderPlan,
+  Region,
+  TitleSearchResult,
+} from '@app/shared';
 import type { HouseholdService } from '../household/household.service.ts';
 import { manageUrl } from './manage-links.ts';
-import { plansFor, PRICES_AS_OF } from './price-catalog.ts';
-import type { TmdbClient, TmdbProvider } from './tmdb.client.ts';
+import { bundleByKey, bundlesFor, plansFor, PRICES_AS_OF } from './price-catalog.ts';
+import type { TmdbClient } from './tmdb.client.ts';
 
-export interface PricedProvider extends TmdbProvider {
+/** A service or bundle with its plans, as the catalog and the plan use it. */
+export interface Offering {
+  key: string;
+  name: string;
+  kind: OfferingKind;
+  includes: string[];
+  logoPath: string | null;
   plans: ProviderPlan[];
+  manageUrl: string | null;
 }
 
 /** What can be subscribed to and watched: TMDB's catalog with our price data merged in. */
 export function createCatalogService(tmdb: TmdbClient, households: HouseholdService) {
-  /** Streaming services in the household's region; ones with known prices first. */
-  async function priced(userId: string): Promise<PricedProvider[]> {
+  /**
+   * Services and bundles in the household's region; ones with known prices first. A bundle is
+   * offered when each of its services streams in the region.
+   */
+  async function offerings(userId: string): Promise<Offering[]> {
     const { region } = await households.context(userId);
-    const providers = (await tmdb.providers(region)).map((provider) => ({
-      ...provider,
+    const providers = await tmdb.providers(region);
+    const services: Offering[] = providers.map((provider) => ({
+      key: provider.key,
+      name: provider.name,
+      kind: 'service',
+      includes: [provider.key],
+      logoPath: provider.logoPath,
       plans: [...plansFor(region, provider.key)],
+      manageUrl: manageUrl(provider.key),
     }));
+    const available = new Set(services.map((service) => service.key));
+    const bundles: Offering[] = bundlesFor(region)
+      .filter((bundle) => bundle.includes.every((key) => available.has(key)))
+      .map((bundle) => ({
+        key: bundle.key,
+        name: bundle.name,
+        kind: 'bundle',
+        includes: [...bundle.includes],
+        logoPath: services.find((s) => s.key === bundle.includes[0])?.logoPath ?? null,
+        plans: [...plansFor(region, bundle.key)],
+        manageUrl: bundle.manageUrl,
+      }));
+    const all = [...services, ...bundles];
     return [
-      ...providers.filter((provider) => provider.plans.length > 0),
-      ...providers.filter((provider) => provider.plans.length === 0),
+      ...all.filter((offering) => offering.plans.length > 0),
+      ...all.filter((offering) => offering.plans.length === 0),
     ];
   }
 
+  const toCatalogProvider = (offering: Offering): CatalogProvider => ({
+    key: offering.key,
+    name: offering.name,
+    kind: offering.kind,
+    includes: offering.includes,
+    logoUrl: tmdb.imageUrl(offering.logoPath, 'w92'),
+    plans: offering.plans,
+    pricesAsOf: offering.plans.length > 0 ? PRICES_AS_OF : null,
+    manageUrl: offering.manageUrl,
+  });
+
   return {
+    offerings,
+    toCatalogProvider,
+
     async providers(userId: string): Promise<CatalogProvider[]> {
-      return (await priced(userId)).map((provider) => ({
-        key: provider.key,
-        name: provider.name,
-        logoUrl: tmdb.imageUrl(provider.logoPath, 'w92'),
-        plans: provider.plans,
-        pricesAsOf: provider.plans.length > 0 ? PRICES_AS_OF : null,
-        manageUrl: manageUrl(provider.key),
-      }));
+      return (await offerings(userId)).map(toCatalogProvider);
     },
 
-    async provider(userId: string, key: string): Promise<PricedProvider | undefined> {
-      return (await priced(userId)).find((provider) => provider.key === key);
+    async provider(userId: string, key: string): Promise<Offering | undefined> {
+      return (await offerings(userId)).find((offering) => offering.key === key);
+    },
+
+    /**
+     * An offering for a subscription even when TMDB can't be reached or no longer lists it:
+     * from the bundle definitions and price catalog, named as the subscription is.
+     */
+    fallbackOffering(
+      region: string,
+      subscription: { providerKey: string; name: string; logoUrl: string | null },
+    ): CatalogProvider {
+      const bundle = bundleByKey(subscription.providerKey);
+      const plans = [...plansFor(region, subscription.providerKey)];
+      return {
+        key: subscription.providerKey,
+        name: bundle?.name ?? subscription.name,
+        kind: bundle ? 'bundle' : 'service',
+        includes: [...(bundle?.includes ?? [subscription.providerKey])],
+        logoUrl: subscription.logoUrl,
+        plans,
+        pricesAsOf: plans.length > 0 ? PRICES_AS_OF : null,
+        manageUrl: bundle?.manageUrl ?? manageUrl(subscription.providerKey),
+      };
     },
 
     regions(): Promise<Region[]> {

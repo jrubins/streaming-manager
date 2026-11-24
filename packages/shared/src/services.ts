@@ -20,11 +20,14 @@ export const ProviderKeySchema = z
 
 const PriceCentsSchema = z.number().int().min(0).max(100_000);
 
-/** A streaming service the household subscribes to (or has paused). */
+/** A streaming service, or bundle of services, the household subscribes to (or has paused). */
 export const ServiceSchema = z.object({
   id: z.number().int(),
+  /** The service or bundle subscribed to (a catalog key). */
   providerKey: z.string(),
   name: z.string(),
+  /** The services it unlocks: itself, or each service of a bundle. */
+  includes: z.string().array(),
   logoUrl: z.string().nullable(),
   planName: z.string().nullable(),
   monthlyPriceCents: z.number().int().nullable(),

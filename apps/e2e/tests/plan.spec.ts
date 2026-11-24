@@ -31,30 +31,36 @@ async function seedHousehold(api: APIRequestContext) {
 }
 
 test.describe('plan page', () => {
-  test('shows what to keep, pause and resume this month', async ({ page, api, capture }) => {
+  test('shows what to keep, switch, pause and resume this month', async ({
+    page,
+    api,
+    capture,
+  }) => {
     await seedHousehold(api);
     await page.goto('/');
 
     await expect(page.getByRole('heading', { level: 1, name: "This month's plan" })).toBeVisible();
-    const hero = page.getByRole('region', { name: 'Monthly cost' });
-    await expect(hero.getByText('$16.49/mo')).toBeVisible();
-    await expect(hero.getByText('$197.88 a year')).toBeVisible();
-    await expect(hero.getByText('$47.47')).toBeVisible();
-    await expect(hero.getByText('$30.98')).toBeVisible();
-
-    const card = (name: string) => page.getByRole('row', { name, exact: true });
-    await expect(card('Netflix').getByText('Keep')).toBeVisible();
-    await expect(card('Netflix').getByText('Needed for 5 titles on your list')).toBeVisible();
-    await expect(card('HBO Max').getByText('Resume', { exact: true })).toBeVisible();
+    const summary = page.getByRole('region', { name: 'Monthly cost' });
+    await expect(summary.getByText('$47.47')).toBeVisible();
+    await expect(summary.getByText('$19.98')).toBeVisible();
+    await expect(summary.getByText('$27.49/mo')).toBeVisible();
     await expect(
-      card('HBO Max').getByText('1 title waiting for it', { exact: false }),
+      page.getByText('Planned for: Ads OK · 1 screen · HD · new services suggested'),
     ).toBeVisible();
-    await expect(card('Hulu').getByText('Its title is also on Netflix')).toBeVisible();
-    await expect(card('Apple TV+').getByText('Nothing on your list streams here')).toBeVisible();
-    await expect(card('Peacock').getByText('Stay paused', { exact: true })).toBeVisible();
-    await expect(card('Peacock').getByText('Its title is also on Netflix')).toBeVisible();
-    await expect(card('Disney+')).toBeVisible();
-    await expect(page.getByText('Streams on Starz')).toBeVisible();
+
+    const row = (name: string) => page.getByRole('row', { name, exact: true });
+    // Ads are fine by default: Netflix moves to its ad plan for the same titles.
+    await expect(row('Netflix').getByText('Switch plan')).toBeVisible();
+    await expect(row('Netflix').getByText('Same titles for $11.00 less')).toBeVisible();
+    await expect(row('Netflix').getByText('Needed for')).toHaveCount(0);
+    await expect(row('HBO Max').getByText('Resume', { exact: true })).toBeVisible();
+    await expect(row('Hulu').getByText('Its title is also on Netflix')).toBeVisible();
+    await expect(row('Apple TV+').getByText('Nothing on your list streams here')).toBeVisible();
+    await expect(row('Peacock').getByText('Stay paused', { exact: true })).toBeVisible();
+    await expect(row('Peacock').getByText('Its title is also on Netflix')).toBeVisible();
+    await expect(row('Disney+')).toBeVisible();
+    const notCovered = page.getByRole('region', { name: 'Not covered' });
+    await expect(notCovered.getByText('Streams on Starz')).toBeVisible();
     await page.waitForLoadState('networkidle');
     await capture('plan');
 
@@ -65,13 +71,7 @@ test.describe('plan page', () => {
     await capture('plan-title-tooltip');
     await netflixTitles.getByRole('button', { name: /show all 5 titles on Netflix/ }).click();
     const dialog = page.getByRole('dialog', { name: 'Titles on Netflix' });
-    for (const title of [
-      'The Long Harbor',
-      'Lantern Season',
-      'Quarry Road',
-      'Harbor Lights',
-      'Northbound',
-    ]) {
+    for (const title of ['The Long Harbor', 'Lantern Season', 'Quarry Road', 'Harbor Lights']) {
       await expect(dialog.getByText(title, { exact: true })).toBeVisible();
     }
     await expect(dialog.getByText('Also on Hulu')).toBeVisible();
@@ -80,29 +80,63 @@ test.describe('plan page', () => {
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
 
-    // Marking a pause done updates the plan.
+    // Each change links to the service's own page, then is marked done here.
     await page.getByRole('button', { name: 'Hulu actions' }).click();
     await expect(page.getByRole('menuitem', { name: 'Pause on hulu.com' })).toHaveAttribute(
       'href',
       'https://www.hulu.com/account',
     );
-    await expect(page.getByRole('menuitem', { name: 'Mark as paused' })).toBeVisible();
-    // Let the menu finish fading in before the screenshot.
     await page
       .getByRole('menu')
       .evaluate((menu) => Promise.all(menu.getAnimations().map((a) => a.finished)));
     await capture('plan-row-menu');
     await page.getByRole('menuitem', { name: 'Mark as paused' }).click();
-    await expect(card('Hulu').getByText('Stay paused', { exact: true })).toBeVisible();
-    await expect(hero.getByText('$34.98')).toBeVisible();
+    await expect(row('Hulu').getByText('Stay paused', { exact: true })).toBeVisible();
+    await expect(summary.getByText('$34.98')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Netflix actions' }).click();
+    await page.getByRole('menuitem', { name: 'Mark plan as changed' }).click();
+    await expect(row('Netflix').getByText('Keep', { exact: true })).toBeVisible();
+    await expect(summary.getByText('$23.98')).toBeVisible();
   });
 
-  test('links to a search for services without a known account page', async ({ page, api }) => {
-    await api.post('/services', { data: { providerKey: 'starz' } });
+  test('offers the plan under other preferences', async ({ page, api, capture }) => {
+    await seedHousehold(api);
     await page.goto('/');
-    await page.getByRole('button', { name: 'Starz actions' }).click();
-    const link = page.getByRole('menuitem', { name: 'Find how to pause Starz' });
-    await expect(link).toHaveAttribute('href', /google\.com\/search\?q=how\+to\+pause/);
+
+    const options = page.getByRole('list', { name: 'Other options' });
+    const noAds = options.getByRole('listitem', { name: 'No ads' });
+    await expect(noAds.getByText('+$18.50/mo')).toBeVisible();
+    await expect(noAds.getByText(/HBO Max: Standard/)).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await capture('plan-alternatives');
+
+    await noAds.getByRole('button', { name: 'Use this option: No ads' }).click();
+    await expect(page.getByText(/Planned for: No ads/)).toBeVisible();
+    const summary = page.getByRole('region', { name: 'Monthly cost' });
+    await expect(summary.getByText('$38.48')).toBeVisible();
+    await expect(
+      page.getByRole('row', { name: 'Netflix', exact: true }).getByText('Keep', { exact: true }),
+    ).toBeVisible();
+  });
+
+  test('suggests a bundle that beats separate subscriptions', async ({ page, api, capture }) => {
+    for (const providerKey of ['hulu', 'disney-plus', 'hbo-max']) {
+      await api.post('/services', { data: { providerKey } });
+    }
+    await api.post('/watchlist', { data: { tmdbId: 1003, mediaType: 'tv' } }); // Hulu or Disney+
+    await api.post('/watchlist', { data: { tmdbId: 1002, mediaType: 'tv' } }); // HBO Max
+    await page.goto('/');
+
+    const bundle = page.getByRole('row', { name: 'Disney+, Hulu & HBO Max', exact: true });
+    await expect(bundle.getByText('Subscribe', { exact: true })).toBeVisible();
+    await expect(bundle.getByText('Includes Disney+, Hulu, and HBO Max')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await capture('plan-bundle');
+
+    await page.getByRole('button', { name: 'Disney+, Hulu & HBO Max actions' }).click();
+    await page.getByRole('menuitem', { name: 'Mark as subscribed' }).click();
+    await expect(bundle.getByText('Keep', { exact: true })).toBeVisible();
   });
 
   test('shows the way in when the plan is empty', async ({ page, capture }) => {

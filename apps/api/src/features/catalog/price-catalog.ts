@@ -1,54 +1,122 @@
 import type { ProviderPlan } from '@app/shared';
 
 /**
- * Published monthly prices (USD) of the most common US streaming plans, keyed by provider
- * key. Prices change often: update them and `PRICES_AS_OF` together. Members can always
- * override a service's price, and forwarded invoices take precedence.
+ * Published monthly prices (USD) and features of the most common US streaming plans, keyed by
+ * provider key, and the bundles that combine services. Prices and limits change often: update
+ * them and `PRICES_AS_OF` together. Members can always override a subscription's price.
  *
- * Sources (checked 2026-11-24): the services' plan pages via cloudwards.net,
- * smarttvs.org, comparesubscriptions.com and applescoop.org price comparisons.
+ * Sources (checked 2026-11-24): the services' plan and bundle pages (hulu.com, disneyplus.com)
+ * and cloudwards.net, smarttvs.org, comparesubscriptions.com, applescoop.org and
+ * dealnews.com comparisons. Least certain, where sources disagreed: Disney+ ad tier screens,
+ * Prime Video ad-free screens, Paramount+ Premium screens, and the Disney+/Hulu/HBO Max
+ * bundle (only its ad-supported price was found).
  */
 export const PRICES_AS_OF = '2026-11-24';
 
-export const US_PRICE_CATALOG: Readonly<Record<string, readonly ProviderPlan[]>> = {
+const plan = (
+  name: string,
+  dollars: number,
+  features: Pick<ProviderPlan, 'ads' | 'streams' | 'uhd' | 'downloads'>,
+): ProviderPlan => ({ name, monthlyPriceCents: Math.round(dollars * 100), ...features });
+
+const US_PLANS: Readonly<Record<string, readonly ProviderPlan[]>> = {
   netflix: [
-    { name: 'Standard with ads', monthlyPriceCents: 899 },
-    { name: 'Standard', monthlyPriceCents: 1999 },
-    { name: 'Premium', monthlyPriceCents: 2699 },
+    plan('Standard with ads', 8.99, { ads: true, streams: 2, uhd: false, downloads: true }),
+    plan('Standard', 19.99, { ads: false, streams: 2, uhd: false, downloads: true }),
+    plan('Premium', 26.99, { ads: false, streams: 4, uhd: true, downloads: true }),
   ],
   hulu: [
-    { name: 'With ads', monthlyPriceCents: 1249 },
-    { name: 'No ads', monthlyPriceCents: 2149 },
+    plan('With ads', 12.49, { ads: true, streams: 2, uhd: false, downloads: false }),
+    plan('No ads', 21.49, { ads: false, streams: 2, uhd: false, downloads: true }),
   ],
   'disney-plus': [
-    { name: 'Basic (with ads)', monthlyPriceCents: 1249 },
-    { name: 'Premium', monthlyPriceCents: 2149 },
+    plan('Basic (with ads)', 12.49, { ads: true, streams: 2, uhd: false, downloads: false }),
+    plan('Premium', 21.49, { ads: false, streams: 4, uhd: true, downloads: true }),
   ],
   'hbo-max': [
-    { name: 'Basic with ads', monthlyPriceCents: 1099 },
-    { name: 'Standard', monthlyPriceCents: 1849 },
-    { name: 'Premium', monthlyPriceCents: 2299 },
+    plan('Basic with ads', 10.99, { ads: true, streams: 2, uhd: false, downloads: false }),
+    plan('Standard', 18.49, { ads: false, streams: 2, uhd: false, downloads: true }),
+    plan('Premium', 22.99, { ads: false, streams: 4, uhd: true, downloads: true }),
   ],
   peacock: [
-    { name: 'Select', monthlyPriceCents: 899 },
-    { name: 'Premium', monthlyPriceCents: 1299 },
-    { name: 'Premium Plus', monthlyPriceCents: 1999 },
+    plan('Select', 8.99, { ads: true, streams: 3, uhd: false, downloads: false }),
+    plan('Premium', 12.99, { ads: true, streams: 3, uhd: false, downloads: false }),
+    plan('Premium Plus', 19.99, { ads: false, streams: 3, uhd: false, downloads: true }),
   ],
   'paramount-plus': [
-    { name: 'Essential', monthlyPriceCents: 899 },
-    { name: 'Premium', monthlyPriceCents: 1399 },
+    plan('Essential', 8.99, { ads: true, streams: 3, uhd: false, downloads: false }),
+    plan('Premium', 13.99, { ads: false, streams: 3, uhd: true, downloads: true }),
   ],
   'amazon-prime-video': [
-    { name: 'Prime Video (with ads)', monthlyPriceCents: 899 },
-    { name: 'Prime Video ad-free', monthlyPriceCents: 1398 },
+    plan('Prime Video (with ads)', 8.99, { ads: true, streams: 3, uhd: true, downloads: true }),
+    plan('Prime Video ad-free', 13.98, { ads: false, streams: 5, uhd: true, downloads: true }),
   ],
-  'apple-tv-plus': [{ name: 'Monthly', monthlyPriceCents: 1499 }],
+  'apple-tv-plus': [plan('Monthly', 14.99, { ads: false, streams: 6, uhd: true, downloads: true })],
 };
 
-/** Known plans for a provider in a region, cheapest first. Only US prices are known today. */
+export interface BundleDefinition {
+  key: string;
+  name: string;
+  /** Provider keys of the services it includes. */
+  includes: readonly string[];
+  plans: readonly ProviderPlan[];
+  /** Where it is managed (paused, cancelled), when known. */
+  manageUrl: string | null;
+}
+
+/**
+ * Bundles: on a bundle, "ads" means any of its services shows ads, and screens, 4K and
+ * downloads are what every one of its services allows (the weakest).
+ */
+const US_BUNDLES: readonly BundleDefinition[] = [
+  {
+    key: 'disney-hulu-espn-select',
+    name: 'Disney+, Hulu & ESPN Select',
+    includes: ['disney-plus', 'hulu', 'espn-plus'],
+    plans: [
+      plan('With ads', 21.99, { ads: true, streams: 2, uhd: false, downloads: false }),
+      // Disney+ and Hulu without ads; ESPN Select itself always has ads.
+      plan('Premium', 32.99, { ads: true, streams: 2, uhd: false, downloads: true }),
+    ],
+    manageUrl: 'https://www.disneyplus.com/account',
+  },
+  {
+    key: 'disney-hulu-espn-unlimited',
+    name: 'Disney+, Hulu & ESPN Unlimited',
+    includes: ['disney-plus', 'hulu', 'espn-plus'],
+    plans: [
+      plan('With ads', 35.99, { ads: true, streams: 2, uhd: false, downloads: false }),
+      plan('Premium', 44.99, { ads: true, streams: 2, uhd: false, downloads: true }),
+    ],
+    manageUrl: 'https://www.disneyplus.com/account',
+  },
+  {
+    key: 'disney-hulu-max',
+    name: 'Disney+, Hulu & HBO Max',
+    includes: ['disney-plus', 'hulu', 'hbo-max'],
+    plans: [plan('With ads', 21.99, { ads: true, streams: 2, uhd: false, downloads: false })],
+    manageUrl: 'https://www.disneyplus.com/account',
+  },
+];
+
+/** Known plans for a service or bundle in a region, cheapest first. Only US is known today. */
 export function plansFor(region: string, key: string): readonly ProviderPlan[] {
   if (region !== 'US') return [];
-  return [...(US_PRICE_CATALOG[key] ?? [])].sort(
-    (a, b) => a.monthlyPriceCents - b.monthlyPriceCents,
-  );
+  const plans = US_PLANS[key] ?? US_BUNDLES.find((bundle) => bundle.key === key)?.plans ?? [];
+  return [...plans].sort((a, b) => a.monthlyPriceCents - b.monthlyPriceCents);
+}
+
+/** Bundles offered in a region. */
+export function bundlesFor(region: string): readonly BundleDefinition[] {
+  return region === 'US' ? US_BUNDLES : [];
+}
+
+/** A bundle by key (in any region), for subscriptions to it. */
+export function bundleByKey(key: string): BundleDefinition | undefined {
+  return US_BUNDLES.find((bundle) => bundle.key === key);
+}
+
+/** The services a subscription unlocks: a bundle's services, or the service itself. */
+export function includedServices(key: string): string[] {
+  return [...(bundleByKey(key)?.includes ?? [key])];
 }

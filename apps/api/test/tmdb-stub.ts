@@ -39,12 +39,13 @@ export const STUB_PROVIDERS: readonly StubProvider[] = [
   { id: 283, name: 'Crunchyroll', logo: 'crunchyroll', color: '#f47521', priority: 12 },
   { id: 43, name: 'Starz', logo: 'starz', color: '#111111', priority: 14 },
   { id: 73, name: 'Tubi TV', logo: 'tubi', color: '#7408ff', priority: 20 },
+  { id: 1768, name: 'ESPN Plus', logo: 'espn', color: '#c8102e', priority: 16 },
   { id: 230, name: 'Crave', logo: 'crave', color: '#00a8e1', priority: 3 },
 ];
 
 /** Providers listed per region (CA has Crave and fewer US services). */
 const REGION_PROVIDERS: Record<string, number[]> = {
-  US: [8, 1796, 9, 337, 15, 1899, 1825, 350, 386, 531, 582, 283, 43, 73],
+  US: [8, 1796, 9, 337, 15, 1899, 1825, 350, 386, 531, 582, 283, 43, 73, 1768],
   CA: [8, 9, 337, 350, 230, 283],
 };
 

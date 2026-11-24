@@ -9,6 +9,7 @@ const meta = {
   args: {
     services: [SERVICES.netflix, SERVICES.hulu, SERVICES.starz],
     plansFor: (key: string) => PROVIDERS.find((p) => p.key === key)?.plans ?? [],
+    providerName: (key: string) => PROVIDERS.find((p) => p.key === key)?.name ?? key,
     onChange: fn(),
     onRemove: fn(),
   },

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { JoinHouseholdSchema, UpdateHouseholdSchema } from '@app/shared';
+import { JoinHouseholdSchema, UpdateHouseholdSchema, UpdatePreferencesSchema } from '@app/shared';
 import { currentUserId, currentUserName } from '../../auth/middleware.ts';
 import { validate } from '../../lib/validate.ts';
 import type { WatchlistService } from '../watchlist/watchlist.service.ts';
@@ -20,6 +20,15 @@ export function householdRouter(households: HouseholdService, watchlist: Watchli
     // Streaming catalogs differ by country: look every title up again for the new one.
     if (household.region !== before.region) await watchlist.refreshAll(userId);
     res.json(household);
+  });
+
+  router.get('/preferences', async (req, res) => {
+    res.json(await households.preferences(currentUserId(req)));
+  });
+
+  router.patch('/preferences', async (req, res) => {
+    const input = validate(UpdatePreferencesSchema, req.body);
+    res.json(await households.updatePreferences(currentUserId(req), input));
   });
 
   router.post('/join', async (req, res) => {

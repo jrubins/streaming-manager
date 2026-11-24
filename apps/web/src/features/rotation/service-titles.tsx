@@ -14,8 +14,8 @@ import { Poster } from './poster-strip';
 
 interface ServiceTitlesProps {
   serviceName: string;
-  /** The service's provider key, left out of each title's "also on" list. */
-  providerKey: string;
+  /** The services it includes, left out of each title's "also on" list. */
+  includes: readonly string[];
   shows: readonly WatchlistShow[];
   /** Provider key → display name, for where else each title streams. */
   providerName: (key: string) => string;
@@ -32,7 +32,7 @@ const describe = (show: WatchlistShow) =>
  */
 export function ServiceTitles({
   serviceName,
-  providerKey,
+  includes,
   shows,
   providerName,
   max = 4,
@@ -92,7 +92,7 @@ export function ServiceTitles({
           </DialogHeader>
           <ul className="-mx-2 max-h-[60vh] divide-y overflow-y-auto" aria-label="Titles">
             {shows.map((show) => {
-              const elsewhere = show.providerKeys.filter((key) => key !== providerKey);
+              const elsewhere = show.providerKeys.filter((key) => !includes.includes(key));
               return (
                 <li key={show.id} className="flex items-center gap-3 px-2 py-2.5">
                   <Poster show={show} decorative className="w-10 shrink-0" />
