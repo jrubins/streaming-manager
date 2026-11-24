@@ -1,7 +1,12 @@
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
-import { ApiErrorSchema, ItemSchema } from '@app/shared';
+import {
+  ApiErrorSchema,
+  RotationPlanSchema,
+  ServiceSchema,
+  WatchlistShowSchema,
+} from '@app/shared';
 import express from 'express';
 import { pino } from 'pino';
 import { pinoHttp } from 'pino-http';
@@ -10,7 +15,7 @@ import { z } from 'zod';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { mcpMetadataRouter } from '../src/features/mcp/mcp.routes.ts';
 import { errorHandler } from '../src/middleware/error-handler.ts';
-import { bearer, createTestApp, unique, uniqueUserId } from './helpers.ts';
+import { bearer, createTestApp, uniqueUserId } from './helpers.ts';
 
 const AUTHKIT = 'https://example.authkit.app';
 const { app, db } = createTestApp({ AUTHKIT_DOMAIN: AUTHKIT });
@@ -43,24 +48,58 @@ describe('MCP endpoint', () => {
     const client = await connect(uniqueUserId());
     const { tools } = await client.listTools();
     expect(tools.map((tool) => tool.name)).toEqual(
-      expect.arrayContaining(['list_items', 'add_item', 'delete_item']),
+      expect.arrayContaining([
+        'get_rotation_plan',
+        'list_watchlist',
+        'search_titles',
+        'add_to_watchlist',
+        'set_watched',
+        'remove_from_watchlist',
+        'list_services',
+        'list_available_services',
+        'add_service',
+        'update_service',
+      ]),
     );
     await client.close();
   });
 
-  it("acts as the signed-in user, on that user's data only", async () => {
+  it("acts as the signed-in user, on their household's data only", async () => {
     const alice = await connect(uniqueUserId());
     const bob = await connect(uniqueUserId());
-    const name = unique('Squat');
 
-    const added = await alice.callTool({ name: 'add_item', arguments: { name } });
-    const item = ItemSchema.parse(added.structuredContent);
+    const service = ServiceSchema.parse(
+      (await alice.callTool({ name: 'add_service', arguments: { providerKey: 'netflix' } }))
+        .structuredContent,
+    );
+    const show = WatchlistShowSchema.parse(
+      (
+        await alice.callTool({
+          name: 'add_to_watchlist',
+          arguments: { tmdbId: 1001, mediaType: 'tv' },
+        })
+      ).structuredContent,
+    );
 
-    const ItemList = z.object({ items: ItemSchema.array() });
-    const aliceList = await alice.callTool({ name: 'list_items', arguments: {} });
-    expect(ItemList.parse(aliceList.structuredContent).items).toContainEqual(item);
-    const bobList = await bob.callTool({ name: 'list_items', arguments: {} });
-    expect(ItemList.parse(bobList.structuredContent).items.map((i) => i.id)).not.toContain(item.id);
+    const alicePlan = RotationPlanSchema.parse(
+      (await alice.callTool({ name: 'get_rotation_plan', arguments: {} })).structuredContent,
+    );
+    expect(alicePlan.entries).toContainEqual({ service, state: 'keep', shows: [show] });
+
+    const List = z.object({ shows: WatchlistShowSchema.array() });
+    const bobList = await bob.callTool({ name: 'list_watchlist', arguments: {} });
+    expect(List.parse(bobList.structuredContent).shows.map((s) => s.id)).not.toContain(show.id);
+
+    const watched = await alice.callTool({
+      name: 'set_watched',
+      arguments: { id: show.id, watched: true },
+    });
+    expect(WatchlistShowSchema.parse(watched.structuredContent).watched).toBe(true);
+    const paused = await alice.callTool({
+      name: 'update_service',
+      arguments: { id: service.id, status: 'paused' },
+    });
+    expect(ServiceSchema.parse(paused.structuredContent).status).toBe('paused');
 
     await alice.close();
     await bob.close();
@@ -68,7 +107,7 @@ describe('MCP endpoint', () => {
 
   it('reports invalid tool input as an error result', async () => {
     const client = await connect(uniqueUserId());
-    const result = await client.callTool({ name: 'add_item', arguments: { name: '' } });
+    const result = await client.callTool({ name: 'add_to_watchlist', arguments: { tmdbId: -1 } });
     expect(result.isError).toBe(true);
     await client.close();
   });

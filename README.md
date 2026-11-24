@@ -1,9 +1,11 @@
-# Full-stack TypeScript monorepo template
+# Stream Rotation
 
-A starting point for web apps: a React frontend on Vercel's CDN, an Express API on Vercel
-Functions, Postgres on Neon, and Sentry for errors, tracing, logs and metrics.
-The example "items" feature runs through every layer, so the wiring is easy to follow.
-Replace it with your own features.
+Tells a household which streaming subscriptions to keep and which to pause each month, based
+on what's left on their shared watchlist: the fewest (then cheapest) services that carry every
+unwatched title. Title data and where each title streams come from TMDB (JustWatch).
+
+A React frontend on Vercel's CDN, an Express API on Vercel Functions, Postgres on Neon, and
+Sentry for errors, tracing, logs and metrics. AI assistants can use it through its MCP server.
 
 **Working with AI agents:** [`AGENTS.md`](AGENTS.md) holds the working rules: architecture,
 the add-a-feature checklist, testing rules and notes on library APIs newer than most models'
@@ -139,7 +141,8 @@ a local file, use `pnpm exec dotenvx encrypt` and keep `.env.keys` out of git (i
 ## Auth (WorkOS AuthKit)
 
 Every API route requires a signed-in user except `/health` and the MCP discovery documents.
-Data is per user: rows carry the user's ID (`userId`) and services always filter by it.
+Data belongs to a household: members sign in separately, join with an invite code, and share
+its services and watchlist. Rows carry `householdId` and services always filter by it.
 
 - **Web:** sign-in runs on the API. The browser reaches the API at `/api` on the web app's own
   origin (a Vercel rewrite in `apps/web/vercel.json`; Vite's proxy in development), so the
@@ -183,8 +186,7 @@ chat can use the tools defined in `apps/api/src/features/mcp/mcp.tools.ts`.
 Sentry stays off until a DSN is set (`SENTRY_DSN` for the API, `VITE_SENTRY_DSN` for the web).
 
 - **API:** errors (5xx only), request tracing including Express middleware, `pg` and Prisma
-  spans, pino logs sent to Sentry Logs, and custom metrics (`Sentry.metrics.count(...)`, see
-  the items service). `src/instrument.ts` must load before the app: both entry points import
+  spans, pino logs sent to Sentry Logs, and custom metrics (`Sentry.metrics.count(...)`). `src/instrument.ts` must load before the app: both entry points import
   it first and then load the app with a dynamic `import()`.
 - **Web:** errors (including React render errors), page-load and navigation tracing via the
   TanStack Router integration, and session replay. Replays are recorded only when an error
@@ -226,9 +228,8 @@ Vercel uses Node 26 from the `engines` field in each package.json.
 
 1. On GitHub: **Settings → General → Template repository**. New repos then come from
    **Use this template**.
-2. In a new repo, rename the `@app/*` package scope if you like (search for `@app/`), update
-   the root `package.json` name and the `<title>` in `apps/web/index.html`, and replace the
-   example `Item` model, routes, pages and stories.
+2. In a new repo, rename the `@app/*` package scope if you like (search for `@app/`), and update
+   the root `package.json` name and the `<title>` in `apps/web/index.html`.
 3. To deploy, fill in `infra/terraform.tfvars` and follow [`infra/README.md`](infra/README.md).
 
 ## Notes and caveats

@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { createDb } from '@app/db';
 import { pino } from 'pino';
 import { createApp } from '../src/app.ts';
+import { createTmdbClient } from '../src/features/catalog/tmdb.client.ts';
+import { createTmdbStub, type TmdbStub } from './tmdb-stub.ts';
 import type { WorkosSessions } from '../src/auth/workos-sessions.ts';
 import { signTestToken } from '../src/auth/tokens.ts';
 import { loadConfig } from '../src/config.ts';
@@ -17,7 +19,7 @@ export const TEST_SECRET =
  */
 export function createTestApp(
   overrides: Record<string, string> = {},
-  deps: { workos?: WorkosSessions } = {},
+  deps: { workos?: WorkosSessions; tmdbStub?: TmdbStub } = {},
 ) {
   const config = loadConfig({
     ...process.env,
@@ -33,11 +35,28 @@ export function createTestApp(
     ALLOWED_USER_IDS: '',
     MCP_RESOURCE_URL: 'http://localhost:3000/mcp',
     AUTH_TEST_SECRET: TEST_SECRET,
+    TMDB_API_TOKEN: 'test-tmdb-token-0123456789',
+    TMDB_API_URL: 'https://tmdb.test',
+    TMDB_IMAGE_URL: 'https://images.tmdb.test/t/p',
     ...overrides,
   });
   const db = createDb(config.DATABASE_URL, { max: 2 });
-  const app = createApp({ config, db, logger: pino({ level: 'silent' }), ...deps });
-  return { app, db, config };
+  // TMDB is never called for real: the client's network is the in-process stub.
+  const tmdbStub = deps.tmdbStub ?? createTmdbStub();
+  const tmdb = createTmdbClient({
+    token: config.TMDB_API_TOKEN,
+    apiUrl: config.TMDB_API_URL,
+    imageUrl: config.TMDB_IMAGE_URL,
+    fetch: tmdbStub.fetch,
+  });
+  const app = createApp({
+    config,
+    db,
+    logger: pino({ level: 'silent' }),
+    tmdb,
+    ...(deps.workos ? { workos: deps.workos } : {}),
+  });
+  return { app, db, config, tmdbStub };
 }
 
 /**

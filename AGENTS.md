@@ -1,7 +1,8 @@
 # Agent guide
 
 Instructions for AI coding agents (and humans) working in this repo. Follow the existing
-patterns: the example `items` feature shows every layer, so copy its shape for new features.
+patterns: the `watchlist` feature shows every layer (shared schema, service, routes, MCP
+tools, queries, page, stories, e2e), so copy its shape for new features.
 The README explains the setup; this file is the working rules.
 
 ## Getting set up
@@ -34,7 +35,7 @@ A change is done when **`pnpm check` and `pnpm e2e` pass** and:
 ```sh
 pnpm check                                    # typecheck, lint, format, unit/API/story tests
 pnpm e2e                                      # end-to-end tests in a real browser
-pnpm e2e tests/items.spec.ts                  # one e2e file (run from apps/e2e)
+pnpm e2e tests/plan.spec.ts                   # one e2e file (run from apps/e2e)
 pnpm typecheck | pnpm lint | pnpm format | pnpm test
 pnpm --filter @app/api test                   # one package's tests
 pnpm --filter @app/db emit                    # after editing contract.prisma
@@ -105,14 +106,20 @@ Not enforced by tooling, so check yourself:
   validates input with `validate(Schema, input)`, the web validates responses via
   `apiRequest(path, Schema)` and forms via TanStack Form `validators: { onSubmit: Schema }`.
 - Expected failures throw `HttpError` (or `notFound()`); never send error JSON by hand.
-- **Data is per user.** Every table holding user data has `userId`. Services take the acting
-  user's ID as their first argument and filter every query by it; handlers get it from
-  `currentUserId(req)` (REST) or the MCP server's `userId`. Another user's row is a 404, never
-  a 403. Only `/health`, MCP discovery and dev sign-in are public.
+- **Data belongs to a household.** Members sign in separately and share it. Every table
+  holding household data has `householdId`. Services take the acting user's ID as their first
+  argument, resolve it with `households.context(userId)` and filter every query by the
+  household's ID; handlers get the user from `currentUserId(req)` (REST) or the MCP server's
+  `userId`. Another household's row is a 404, never a 403. Only `/health`, MCP discovery and
+  dev sign-in are public.
+- **TMDB** is the only outside data source (`features/catalog/tmdb.client.ts`). Tests never
+  call it: API tests pass the stub in `apps/api/test/tmdb-stub.ts` to the client, and e2e runs
+  the same stub as a server (`pnpm --filter @app/api tmdb-stub`). New TMDB calls need stub
+  routes too.
 - **MCP tools** mirror the REST API: same services, same shared schemas as `inputSchema`. A
   feature an AI assistant should use gets tools in `features/mcp/mcp.tools.ts` and tests in
   `apps/api/test/mcp.test.ts` (connect a real MCP client as a unique user).
-- Services return plain shared types (`Item`), converting dates with `toISOString()`.
+- Services return plain shared types (`WatchlistShow`), converting dates with `toISOString()`.
 
 ## Adding a feature (end to end)
 

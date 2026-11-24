@@ -154,6 +154,24 @@ variable "workos_api_key_version" {
   default     = 1
 }
 
+variable "tmdb_api_token" {
+  description = "TMDB API Read Access Token: title search and streaming availability. From the TMDB_API_TOKEN Actions secret; never stored in state."
+  type        = string
+  sensitive   = true
+  ephemeral   = true
+
+  validation {
+    condition     = length(var.tmdb_api_token) >= 20
+    error_message = "Set the TMDB_API_TOKEN Actions secret to your TMDB API Read Access Token."
+  }
+}
+
+variable "tmdb_api_token_version" {
+  description = "Bump to send a rotated TMDB_API_TOKEN to Vercel."
+  type        = number
+  default     = 1
+}
+
 variable "cookie_password_version" {
   description = "Bump to generate a new session cookie password. Signs everyone out."
   type        = number

@@ -1,4 +1,4 @@
-import { ApiErrorSchema, ItemSchema, LogoutResponseSchema, SessionSchema } from '@app/shared';
+import { ApiErrorSchema, HouseholdSchema, LogoutResponseSchema, SessionSchema } from '@app/shared';
 import request from 'supertest';
 import { afterAll, describe, expect, it } from 'vitest';
 import type { WorkosSessions } from '../src/auth/workos-sessions.ts';
@@ -97,40 +97,43 @@ describe('web sign-in with WorkOS', () => {
 
   it('authenticates API requests with the cookie', async () => {
     const cookie = await signIn(uniqueUserId());
-    await request(app).get('/items').set('Cookie', cookie).expect(200, []);
+    await request(app).get('/services').set('Cookie', cookie).expect(200, []);
   });
 
   it('refreshes an expired session and stores the new cookie', async () => {
     const userId = uniqueUserId();
     const res = await request(app)
-      .get('/items')
+      .get('/services')
       .set('Cookie', `app_session=expired:${userId}`)
       .expect(200);
     expect(setCookie(res, 'app_session')).toBe(`sealed:${userId}`);
   });
 
   it('rejects an invalid session and clears its cookie', async () => {
-    const res = await request(app).get('/items').set('Cookie', 'app_session=garbage').expect(401);
+    const res = await request(app)
+      .get('/services')
+      .set('Cookie', 'app_session=garbage')
+      .expect(401);
     expect(setCookie(res, 'app_session')).toBe('');
   });
 
   it('accepts writes from the web app but refuses cross-site ones', async () => {
     const cookie = await signIn(uniqueUserId());
     const item = { name: unique('cookie-write') };
-    await request(app).post('/items').set('Cookie', cookie).send(item).expect(403);
+    await request(app).patch('/household').set('Cookie', cookie).send(item).expect(403);
     await request(app)
-      .post('/items')
+      .patch('/household')
       .set('Cookie', cookie)
       .set('Origin', 'https://evil.example')
       .send(item)
       .expect(403);
     const res = await request(app)
-      .post('/items')
+      .patch('/household')
       .set('Cookie', cookie)
       .set('Origin', WEB)
       .send(item)
-      .expect(201);
-    expect(ItemSchema.parse(res.body).name).toBe(item.name);
+      .expect(200);
+    expect(HouseholdSchema.parse(res.body).name).toBe(item.name);
   });
 
   it('signs out: clears the cookie and returns WorkOS sign-out URL', async () => {
@@ -153,11 +156,11 @@ describe('web sign-in with WorkOS', () => {
     );
     try {
       await request(lockedApp)
-        .get('/items')
+        .get('/services')
         .set('Cookie', `app_session=sealed:${allowed}`)
         .expect(200);
       await request(lockedApp)
-        .get('/items')
+        .get('/services')
         .set('Cookie', `app_session=sealed:${uniqueUserId()}`)
         .expect(403);
     } finally {
@@ -182,7 +185,7 @@ describe('development sign-in', () => {
       email: null,
       name: userId,
     });
-    await request(devApp).get('/items').set('Cookie', cookie).expect(200, []);
+    await request(devApp).get('/services').set('Cookie', cookie).expect(200, []);
   });
 
   it('has no WorkOS sign-in routes', async () => {

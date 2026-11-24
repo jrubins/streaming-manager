@@ -54,6 +54,17 @@ const EnvSchema = z
      */
     AUTH_TEST_SECRET: z.preprocess(emptyToUndefined, z.string().min(32).optional()),
 
+    // --- TMDB (show search and where each title streams) -----------------------------------
+    /**
+     * TMDB API Read Access Token (Settings → API). Without it, searching and adding titles
+     * answer 503; everything else works.
+     */
+    TMDB_API_TOKEN: z.preprocess(emptyToUndefined, z.string().min(20).optional()),
+    /** TMDB API base URL. Tests point it at a local stub. */
+    TMDB_API_URL: z.url().default('https://api.themoviedb.org'),
+    /** Base URL for TMDB images (posters, logos). */
+    TMDB_IMAGE_URL: z.url().default('https://image.tmdb.org/t/p'),
+
     // --- Monitoring ------------------------------------------------------------------------
     SENTRY_DSN: z.preprocess(emptyToUndefined, z.url().optional()),
     SENTRY_ENVIRONMENT: z.preprocess(emptyToUndefined, z.string().optional()),

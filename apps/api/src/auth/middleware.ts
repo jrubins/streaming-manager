@@ -6,6 +6,8 @@ import type { WebSessions } from './web-sessions.ts';
 
 /** Authenticated user per request, set by `requireUser`. Read it with `currentUserId`. */
 const requestUsers = new WeakMap<Request, string>();
+/** The web session's display name, when the request came from the web app. */
+const requestUserNames = new WeakMap<Request, string>();
 
 /** Reads the token from an `Authorization: Bearer <token>` header. */
 export function bearerToken(req: Request): string | undefined {
@@ -57,6 +59,8 @@ export function requireUser({
         throw new HttpError(403, 'forbidden', 'Cross-site request refused');
       }
       userId = user.id;
+      const name = user.name ?? user.email;
+      if (name) requestUserNames.set(req, name);
     }
     if (!isAllowedUser(allowedUserIds, userId)) {
       throw new HttpError(403, 'forbidden', 'This account does not have access');
@@ -90,6 +94,11 @@ export function currentUserId(req: Request): string {
   const userId = requestUsers.get(req);
   if (!userId) throw new HttpError(401, 'unauthorized', 'Sign in required');
   return userId;
+}
+
+/** The signed-in user's name (or email) from the web session; null for bearer tokens. */
+export function currentUserName(req: Request): string | null {
+  return requestUserNames.get(req) ?? null;
 }
 
 function issuerOrUndefined(token: string): string | undefined {

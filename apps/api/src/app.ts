@@ -15,8 +15,17 @@ import { devAuthRouter } from './features/auth/dev-auth.routes.ts';
 import { sessionRouter } from './features/auth/session.routes.ts';
 import { healthRouter } from './features/health/health.routes.ts';
 import { createHealthService } from './features/health/health.service.ts';
-import { createItemsService } from './features/items/items.service.ts';
-import { itemsRouter } from './features/items/items.routes.ts';
+import { catalogRouter } from './features/catalog/catalog.routes.ts';
+import { createCatalogService } from './features/catalog/catalog.service.ts';
+import { createTmdbClient, type TmdbClient } from './features/catalog/tmdb.client.ts';
+import { householdRouter } from './features/household/household.routes.ts';
+import { createHouseholdService } from './features/household/household.service.ts';
+import { rotationRouter } from './features/rotation/rotation.routes.ts';
+import { createRotationService } from './features/rotation/rotation.service.ts';
+import { streamingServicesRouter } from './features/streaming-services/streaming-services.routes.ts';
+import { createStreamingServicesService } from './features/streaming-services/streaming-services.service.ts';
+import { watchlistRouter } from './features/watchlist/watchlist.routes.ts';
+import { createWatchlistService } from './features/watchlist/watchlist.service.ts';
 import { mcpHandlers, mcpMetadataRouter } from './features/mcp/mcp.routes.ts';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.ts';
 
@@ -28,6 +37,8 @@ export interface AppDeps {
   verifier?: TokenVerifier;
   /** WorkOS web sign-in. Defaults to one built from config (when configured); tests pass a fake. */
   workos?: WorkosSessions;
+  /** TMDB client. Defaults to one built from config; tests pass one with a stubbed network. */
+  tmdb?: TmdbClient;
 }
 
 /**
@@ -43,6 +54,7 @@ export function createApp({
   logger,
   verifier: injected,
   workos: injectedWorkos,
+  tmdb: injectedTmdb,
 }: AppDeps): Express {
   const app = express();
   const verifier =
@@ -72,7 +84,24 @@ export function createApp({
   });
   // The web app's own origin, plus any configured for cross-origin API clients.
   const trustedOrigins = [...new Set([new URL(config.WEB_URL).origin, ...config.CORS_ORIGINS])];
-  const services = { items: createItemsService(db) };
+  const tmdb =
+    injectedTmdb ??
+    createTmdbClient({
+      token: config.TMDB_API_TOKEN,
+      apiUrl: config.TMDB_API_URL,
+      imageUrl: config.TMDB_IMAGE_URL,
+    });
+  const households = createHouseholdService(db);
+  const catalog = createCatalogService(tmdb, households);
+  const streamingServices = createStreamingServicesService(db, households, catalog, tmdb);
+  const watchlist = createWatchlistService(db, households, tmdb);
+  const services = {
+    households,
+    catalog,
+    streamingServices,
+    watchlist,
+    rotation: createRotationService(streamingServices, watchlist),
+  };
 
   app.disable('x-powered-by');
   app.set('trust proxy', true);
@@ -128,7 +157,11 @@ export function createApp({
       trustedOrigins,
     }),
   );
-  app.use('/items', itemsRouter(services.items));
+  app.use('/household', householdRouter(services.households, services.watchlist));
+  app.use('/catalog', catalogRouter(services.catalog));
+  app.use('/services', streamingServicesRouter(services.streamingServices));
+  app.use('/watchlist', watchlistRouter(services.watchlist));
+  app.use('/rotation', rotationRouter(services.rotation));
 
   app.use(notFoundHandler);
   // Reports 5xx errors to Sentry (no-op while Sentry is disabled), then our JSON error handler.
