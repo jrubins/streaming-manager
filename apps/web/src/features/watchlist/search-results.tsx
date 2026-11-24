@@ -24,7 +24,7 @@ export function SearchResults({ results, added, onAdd, adding = null }: SearchRe
       </p>
       {/* Scrolls on its own, so a long list doesn't push the watchlist down the page. */}
       <ul
-        className="-mx-1 grid max-h-[min(22rem,50vh)] gap-2 overflow-y-auto overscroll-contain px-1 pb-1 sm:grid-cols-2"
+        className="-mx-1 grid max-h-[min(22rem,50vh)] gap-2 overflow-y-auto overscroll-contain px-1 pb-1 grid-cols-1 sm:grid-cols-2"
         aria-label="Search results"
       >
         {results.map((result) => {

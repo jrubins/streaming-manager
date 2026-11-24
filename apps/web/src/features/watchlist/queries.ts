@@ -4,7 +4,13 @@ import {
   type AddToWatchlist,
   type UpdateWatchlistShow,
 } from '@app/shared';
-import { queryOptions, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
 
 export const watchlistQueryOptions = queryOptions({
@@ -19,6 +25,8 @@ export const titleSearchQueryOptions = (q: string) =>
       apiRequest(`/catalog/search?${new URLSearchParams({ q })}`, TitleSearchResultSchema.array()),
     enabled: q.trim().length > 0,
     staleTime: 5 * 60 * 1000,
+    // Keep showing the last results while the next ones load, so the list doesn't flicker.
+    placeholderData: keepPreviousData,
   });
 
 /** The watchlist feeds the plan, so both refresh after a change. */
