@@ -1,12 +1,14 @@
 import type {
   CatalogProvider,
   OfferingKind,
+  Offers,
   ProviderPlan,
   Region,
   TitleSearchResult,
 } from '@app/shared';
 import type { HouseholdService } from '../household/household.service.ts';
 import { manageUrl } from './manage-links.ts';
+import { offersFor, PERKS_AS_OF } from './perk-catalog.ts';
 import { bundleByKey, bundlesFor, plansFor, PRICES_AS_OF } from './price-catalog.ts';
 import type { TmdbClient, TmdbTitle } from './tmdb.client.ts';
 
@@ -75,6 +77,12 @@ export function createCatalogService(tmdb: TmdbClient, households: HouseholdServ
 
     async providers(userId: string): Promise<CatalogProvider[]> {
       return (await offerings(userId)).map(toCatalogProvider);
+    },
+
+    /** Streaming perks of other memberships in the household's region. */
+    async offers(userId: string): Promise<Offers> {
+      const { region } = await households.context(userId);
+      return { ...offersFor(region), asOf: PERKS_AS_OF };
     },
 
     async provider(userId: string, key: string): Promise<Offering | undefined> {

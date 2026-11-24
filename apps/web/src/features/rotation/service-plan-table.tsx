@@ -1,7 +1,8 @@
-import type { RotationEntry } from '@app/shared';
+import { isoToday, type RotationEntry } from '@app/shared';
 import { cn } from 'cn';
 import {
   ArrowRight,
+  Gift,
   Check,
   CircleCheck,
   CirclePause,
@@ -22,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { formatList, formatPrice } from '@/lib/format';
+import { describePerk } from '@/features/services/describe-perk';
 import { manageLink } from '@/lib/manage-link';
 import { ServiceLogo } from './service-logo';
 import { ServiceTitles } from './service-titles';
@@ -96,21 +98,56 @@ function explain(row: ServicePlanRow): string {
 /** The plan line under the name: the plan to be on, or the switch from one to another. */
 function PlanLine({ row }: { row: ServicePlanRow }) {
   const current = row.service?.planName ?? null;
-  if (row.planChange && row.plan) {
-    return (
+  const perkPlan = row.plan?.perk ?? null;
+  const planName = perkPlan?.planName ?? row.plan?.name ?? null;
+  const name =
+    row.planChange && planName ? (
       <span className="inline-flex items-center gap-1">
         {current ?? 'Current plan'}
         <ArrowRight className="size-3" aria-label="to" />
-        <span className="font-medium text-foreground">{row.plan.name}</span>
+        <span className="font-medium text-foreground">{planName}</span>
       </span>
+    ) : (
+      <>{planName ?? current ?? 'No plan set'}</>
     );
-  }
-  return <>{row.plan?.name ?? current ?? 'No plan set'}</>;
+  // A perk of a membership the household has, or one already on the service.
+  const perkLine = perkPlan ? (
+    <span className="flex items-center gap-1 text-xs font-medium text-primary">
+      <Gift className="size-3 shrink-0" aria-hidden />
+      {row.plan?.monthlyPriceCents === 0
+        ? `Free with ${perkPlan.via}`
+        : `${formatPrice(row.plan?.monthlyPriceCents ?? null)}/mo with ${perkPlan.via}`}
+      <a
+        href={perkPlan.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-1 underline-offset-2 hover:underline"
+      >
+        Terms<span className="sr-only"> of the {perkPlan.via} offer</span>
+      </a>
+    </span>
+  ) : row.service?.perk ? (
+    <span className="flex items-center gap-1 text-xs font-medium text-primary">
+      <Gift className="size-3 shrink-0" aria-hidden />
+      {describePerk(row.service.perk, isoToday())}
+    </span>
+  ) : null;
+  return perkLine ? (
+    <span className="flex flex-col gap-0.5">
+      <span>{name}</span>
+      {perkLine}
+    </span>
+  ) : (
+    name
+  );
 }
 
 function Price({ row }: { row: ServicePlanRow }) {
   const inPlan = row.state === 'keep' || row.state === 'resume' || row.state === 'subscribe';
-  const current = row.service?.monthlyPriceCents ?? null;
+  // What the household pays now: a perk's price while it lasts.
+  const current = row.service?.perk
+    ? row.service.perk.monthlyPriceCents
+    : (row.service?.monthlyPriceCents ?? null);
   const cents = inPlan ? (row.plannedCostCents ?? current) : current;
   return (
     <>

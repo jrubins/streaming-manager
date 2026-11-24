@@ -1,6 +1,13 @@
-import type { CatalogProvider, Service, ServiceStatus, UpdateService } from '@app/shared';
+import {
+  isoToday,
+  perkActive,
+  type CatalogProvider,
+  type Service,
+  type ServiceStatus,
+  type UpdateService,
+} from '@app/shared';
 import { cn } from 'cn';
-import { ExternalLink, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ExternalLink, Gift, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +29,8 @@ import {
 import { ServiceLogo } from '@/features/rotation/service-logo';
 import { formatList, formatPrice } from '@/lib/format';
 import { manageLink } from '@/lib/manage-link';
+import { describePerk } from './describe-perk';
+import { PerkDialog } from './perk-dialog';
 
 const CUSTOM = '__custom__';
 
@@ -61,9 +70,15 @@ export function ServicesTable({
   onRemove,
   pending = false,
 }: ServicesTableProps) {
+  const today = isoToday();
+  // A perk sets what a service costs while it lasts.
   const total = services
     .filter((s) => s.status === 'active')
-    .reduce((sum, s) => sum + (s.monthlyPriceCents ?? 0), 0);
+    .reduce(
+      (sum, s) =>
+        sum + (perkActive(s.perk, today) ? s.perk.monthlyPriceCents : (s.monthlyPriceCents ?? 0)),
+      0,
+    );
   const controls = (service: Service): ServiceControlsProps => ({
     service,
     plans: plansFor(service.providerKey),
@@ -169,9 +184,21 @@ function ServiceName({
             {formatList(service.includes.map(providerName))}
           </p>
         ) : null}
-        <p className="text-xs text-muted-foreground">
-          {service.priceSource ? SOURCE_LABELS[service.priceSource] : 'No price yet'}
-        </p>
+        {service.perk ? (
+          <p
+            className={cn(
+              'flex items-center gap-1 text-xs font-medium',
+              perkActive(service.perk, isoToday()) ? 'text-primary' : 'text-muted-foreground',
+            )}
+          >
+            <Gift className="size-3.5 shrink-0" aria-hidden />
+            {describePerk(service.perk, isoToday())}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            {service.priceSource ? SOURCE_LABELS[service.priceSource] : 'No price yet'}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -274,37 +301,51 @@ function PriceInput({ service, onChange, pending }: ServiceControlsProps) {
   );
 }
 
-function ServiceMenu({ service, onRemove, pending }: ServiceControlsProps) {
+function ServiceMenu({ service, onChange, onRemove, pending }: ServiceControlsProps) {
   const link = manageLink(service);
+  const [perkOpen, setPerkOpen] = useState(false);
   return (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          disabled={pending}
-          aria-label={`${service.name} actions`}
-        >
-          <MoreHorizontal aria-hidden />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-56">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {service.name}
-        </DropdownMenuLabel>
-        <DropdownMenuItem asChild>
-          <a href={link.href} target="_blank" rel="noopener noreferrer">
-            <ExternalLink aria-hidden />
-            {link.site ? `Manage on ${link.site}` : `Find how to manage ${service.name}`}
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onSelect={onRemove}>
-          <Trash2 aria-hidden />
-          Remove {service.name}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <PerkDialog
+        serviceName={service.name}
+        perk={service.perk}
+        open={perkOpen}
+        onOpenChange={setPerkOpen}
+        onSave={(perk) => onChange({ perk })}
+      />
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={pending}
+            aria-label={`${service.name} actions`}
+          >
+            <MoreHorizontal aria-hidden />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-56">
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            {service.name}
+          </DropdownMenuLabel>
+          <DropdownMenuItem asChild>
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
+              <ExternalLink aria-hidden />
+              {link.site ? `Manage on ${link.site}` : `Find how to manage ${service.name}`}
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setPerkOpen(true)}>
+            <Gift aria-hidden />
+            {service.perk ? 'Edit perk' : 'Comes with another plan…'}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" onSelect={onRemove}>
+            <Trash2 aria-hidden />
+            Remove {service.name}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
 

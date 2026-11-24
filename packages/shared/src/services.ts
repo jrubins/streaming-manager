@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ServicePerkSchema } from './perks.ts';
 
 export const ServiceStatusSchema = z.enum(['active', 'paused']);
 export type ServiceStatus = z.infer<typeof ServiceStatusSchema>;
@@ -33,6 +34,9 @@ export const ServiceSchema = z.object({
   monthlyPriceCents: z.number().int().nullable(),
   priceSource: PriceSourceSchema.nullable(),
   status: ServiceStatusSchema,
+  /** Set when it comes free or discounted with something else (an internet plan, say).
+   * `monthlyPriceCents` stays the regular price, paid once the perk ends. */
+  perk: ServicePerkSchema.nullable(),
   /** The service's own page for pausing, cancelling or resuming, when known. */
   manageUrl: z.string().nullable(),
   createdAt: z.iso.datetime(),
@@ -45,6 +49,7 @@ export const CreateServiceSchema = z.object({
   /** A plan from the catalog; its price is used unless `monthlyPriceCents` is given. */
   planName: z.string().trim().min(1).max(100).optional(),
   monthlyPriceCents: PriceCentsSchema.optional(),
+  perk: ServicePerkSchema.optional(),
 });
 export type CreateService = z.input<typeof CreateServiceSchema>;
 
@@ -53,6 +58,7 @@ export const UpdateServiceSchema = z
     status: ServiceStatusSchema,
     planName: z.string().trim().min(1).max(100).nullable(),
     monthlyPriceCents: PriceCentsSchema.nullable(),
+    perk: ServicePerkSchema.nullable(),
   })
   .partial();
 export type UpdateService = z.infer<typeof UpdateServiceSchema>;

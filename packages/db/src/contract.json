@@ -103,6 +103,16 @@
                   "kind": "scalar"
                 }
               },
+              "memberships": {
+                "many": {
+                  "elementNullable": false
+                },
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "minStreams": {
                 "nullable": false,
                 "type": {
@@ -216,6 +226,9 @@
                 },
                 "inviteCode": {
                   "column": "inviteCode"
+                },
+                "memberships": {
+                  "column": "memberships"
                 },
                 "minStreams": {
                   "column": "minStreams"
@@ -361,6 +374,27 @@
                   "kind": "scalar"
                 }
               },
+              "perkEndsOn": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "perkPriceCents": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "perkVia": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "planName": {
                 "nullable": true,
                 "type": {
@@ -449,6 +483,15 @@
                 },
                 "name": {
                   "column": "name"
+                },
+                "perkEndsOn": {
+                  "column": "perkEndsOn"
+                },
+                "perkPriceCents": {
+                  "column": "perkPriceCents"
+                },
+                "perkVia": {
+                  "column": "perkVia"
                 },
                 "planName": {
                   "column": "planName"
@@ -666,6 +709,13 @@
         "entries": {
           "table": {
             "Household": {
+              "checks": [
+                {
+                  "expression": "array_position(\"memberships\", NULL) IS NULL",
+                  "name": "Household_memberships_elem_not_null_cee5b156",
+                  "prefix": "Household_memberships_elem_not_null"
+                }
+              ],
               "columns": {
                 "allowAds": {
                   "codecId": "pg/bool@1",
@@ -700,6 +750,18 @@
                 "inviteCode": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
+                  "nullable": false
+                },
+                "memberships": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "default": {
+                    "kind": "literal",
+                    "value": []
+                  },
+                  "many": {
+                    "elementNullable": false
+                  },
                   "nullable": false
                 },
                 "minStreams": {
@@ -908,6 +970,21 @@
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": false
+                },
+                "perkEndsOn": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "perkPriceCents": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": true
+                },
+                "perkVia": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
                 },
                 "planName": {
                   "codecId": "pg/text@1",
@@ -1197,7 +1274,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "3fa41ba7d8d8b75f5f46f74be4237ffa7f75728a23a8a27317a5a0c75be3c057"
+    "storageHash": "b3e22bcbaa098c4f05202bb2583419559af3b41070844c8f674186b1c61dbd2b"
   },
   "execution": {
     "executionHash": "c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606",

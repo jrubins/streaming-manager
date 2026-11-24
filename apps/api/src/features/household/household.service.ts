@@ -4,12 +4,14 @@ import type {
   Household,
   HouseholdMember,
   JoinHousehold,
+  HouseholdMemberships,
   Preferences,
   UpdateHousehold,
   UpdatePreferences,
 } from '@app/shared';
 import { isUniqueViolation } from '../../lib/db-errors.ts';
 import { HttpError, notFound } from '../../lib/http-error.ts';
+import { MEMBERSHIPS } from '../catalog/perk-catalog.ts';
 
 /** The household a user acts in: every other service scopes its data by `id`. */
 export interface HouseholdContext {
@@ -148,6 +150,29 @@ export function createHouseholdService(db: Db) {
     async preferences(userId: string): Promise<Preferences> {
       const member = await membership(userId);
       return readPreferences(member.householdId);
+    },
+
+    /** Keys of the memberships with streaming perks that the household has. */
+    async memberships(userId: string): Promise<HouseholdMemberships> {
+      const member = await membership(userId);
+      const household = await Household.where({ id: member.householdId }).first();
+      if (!household) throw notFound('Household not found');
+      return { memberships: [...household.memberships] };
+    },
+
+    async setMemberships(
+      userId: string,
+      input: HouseholdMemberships,
+    ): Promise<HouseholdMemberships> {
+      const known = new Set(MEMBERSHIPS.map((m) => m.key));
+      const unknown = input.memberships.find((key) => !known.has(key));
+      if (unknown !== undefined) {
+        throw new HttpError(400, 'unknown_membership', `Unknown membership: ${unknown}`);
+      }
+      const member = await membership(userId);
+      const memberships = [...new Set(input.memberships)].sort();
+      await Household.where({ id: member.householdId }).update({ memberships });
+      return { memberships };
     },
 
     async updatePreferences(userId: string, input: UpdatePreferences): Promise<Preferences> {

@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'3fa41ba7d8d8b75f5f46f74be4237ffa7f75728a23a8a27317a5a0c75be3c057'>;
+  StorageHashBase<'b3e22bcbaa098c4f05202bb2583419559af3b41070844c8f674186b1c61dbd2b'>;
 export type ExecutionHash =
   ExecutionHashBase<'c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606'>;
 export type ProfileHash =
@@ -348,6 +348,7 @@ export namespace Models {
     createdAt: FieldOutputTypes['public']['Household']['createdAt'];
     id: FieldOutputTypes['public']['Household']['id'];
     inviteCode: FieldOutputTypes['public']['Household']['inviteCode'];
+    memberships: FieldOutputTypes['public']['Household']['memberships'];
     minStreams: FieldOutputTypes['public']['Household']['minStreams'];
     name: FieldOutputTypes['public']['Household']['name'];
     region: FieldOutputTypes['public']['Household']['region'];
@@ -375,6 +376,9 @@ export namespace Models {
     logoPath: FieldOutputTypes['public']['Service']['logoPath'];
     monthlyPriceCents: FieldOutputTypes['public']['Service']['monthlyPriceCents'];
     name: FieldOutputTypes['public']['Service']['name'];
+    perkEndsOn: FieldOutputTypes['public']['Service']['perkEndsOn'];
+    perkPriceCents: FieldOutputTypes['public']['Service']['perkPriceCents'];
+    perkVia: FieldOutputTypes['public']['Service']['perkVia'];
     planName: FieldOutputTypes['public']['Service']['planName'];
     priceSource: FieldOutputTypes['public']['Service']['priceSource'];
     providerKey: FieldOutputTypes['public']['Service']['providerKey'];
@@ -465,6 +469,16 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
+                };
+                readonly memberships: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', readonly []>;
+                  };
+                  readonly many: { readonly elementNullable: false };
                 };
                 readonly minStreams: {
                   readonly dataType: 'pg/int4';
@@ -637,6 +651,24 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly perkEndsOn: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly perkPriceCents: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly perkVia: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly planName: {
@@ -890,6 +922,11 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly memberships: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: { readonly elementNullable: false };
+              };
               readonly minStreams: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
@@ -966,6 +1003,7 @@ type ContractBase = Omit<
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly inviteCode: { readonly column: 'inviteCode' };
+                readonly memberships: { readonly column: 'memberships' };
                 readonly minStreams: { readonly column: 'minStreams' };
                 readonly name: { readonly column: 'name' };
                 readonly region: { readonly column: 'region' };
@@ -1054,6 +1092,18 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly perkEndsOn: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly perkPriceCents: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly perkVia: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly planName: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1103,6 +1153,9 @@ type ContractBase = Omit<
                 readonly logoPath: { readonly column: 'logoPath' };
                 readonly monthlyPriceCents: { readonly column: 'monthlyPriceCents' };
                 readonly name: { readonly column: 'name' };
+                readonly perkEndsOn: { readonly column: 'perkEndsOn' };
+                readonly perkPriceCents: { readonly column: 'perkPriceCents' };
+                readonly perkVia: { readonly column: 'perkVia' };
                 readonly planName: { readonly column: 'planName' };
                 readonly priceSource: { readonly column: 'priceSource' };
                 readonly providerKey: { readonly column: 'providerKey' };

@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { JoinHouseholdSchema, UpdateHouseholdSchema, UpdatePreferencesSchema } from '@app/shared';
+import {
+  HouseholdMembershipsSchema,
+  JoinHouseholdSchema,
+  UpdateHouseholdSchema,
+  UpdatePreferencesSchema,
+} from '@app/shared';
 import { currentUserId, currentUserName } from '../../auth/middleware.ts';
 import { validate } from '../../lib/validate.ts';
 import type { WatchlistService } from '../watchlist/watchlist.service.ts';
@@ -29,6 +34,15 @@ export function householdRouter(households: HouseholdService, watchlist: Watchli
   router.patch('/preferences', async (req, res) => {
     const input = validate(UpdatePreferencesSchema, req.body);
     res.json(await households.updatePreferences(currentUserId(req), input));
+  });
+
+  router.get('/memberships', async (req, res) => {
+    res.json(await households.memberships(currentUserId(req)));
+  });
+
+  router.put('/memberships', async (req, res) => {
+    const input = validate(HouseholdMembershipsSchema, req.body);
+    res.json(await households.setMemberships(currentUserId(req), input));
   });
 
   router.post('/join', async (req, res) => {

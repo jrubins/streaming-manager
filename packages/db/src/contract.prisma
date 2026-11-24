@@ -36,6 +36,8 @@ model Household {
   require4k          Boolean    @default(false)
   requireDownloads   Boolean    @default(false)
   suggestNewServices Boolean    @default(true)
+  // Keys of memberships with streaming perks (an internet provider, a phone plan, Walmart+).
+  memberships        String[]   @default([])
   createdAt  DateTime           @default(now()) @onCreate(now())
   updatedAt  temporal.UpdatedAt
   members    HouseholdMember[]
@@ -68,6 +70,12 @@ model Service {
   monthlyPriceCents Int?
   priceSource       PriceSource?
   status            ServiceStatus
+  // Set when it comes free or discounted with something else: what provides it ("Xfinity"),
+  // the price while it lasts, and its last day (YYYY-MM-DD, null when it doesn't end).
+  // monthlyPriceCents stays the regular price, paid once the perk ends.
+  perkVia           String?
+  perkPriceCents    Int?
+  perkEndsOn        String?
   createdAt         DateTime           @default(now()) @onCreate(now())
   updatedAt         temporal.UpdatedAt
 
