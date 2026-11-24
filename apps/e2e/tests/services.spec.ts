@@ -6,11 +6,24 @@ test.describe('services page', () => {
     await api.post('/services', { data: { providerKey: 'peacock', status: 'paused' } });
     await page.goto('/services');
     await expect(page.getByRole('heading', { level: 1, name: 'Services' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Your services (2)' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
 
+    // Find it by searching, then add it: the page switches back to the list.
+    await page.getByRole('tab', { name: 'Add a service' }).click();
+    await page.getByLabel('Search services').fill('net');
+    await expect(page.getByRole('button', { name: /^Add Hulu/ })).toHaveCount(0);
+    await page.waitForLoadState('networkidle');
+    await capture('services-add');
     await page.getByRole('button', { name: /^Add Netflix/ }).click();
+    await expect(page.getByRole('tab', { name: 'Your services (3)' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
     const netflix = page.getByRole('row', { name: 'Netflix', exact: true });
     await expect(netflix.getByLabel('Netflix monthly price')).toHaveValue('8.99');
-    await expect(page.getByRole('button', { name: /^Add Netflix/ })).toHaveCount(0);
 
     await netflix.getByRole('combobox', { name: 'Netflix plan' }).click();
     await page.getByRole('option', { name: 'Premium · $26.99' }).click();
@@ -36,15 +49,22 @@ test.describe('services page', () => {
     );
     await page.getByRole('menuitem', { name: 'Remove Netflix' }).click();
     await expect(netflix).toHaveCount(0);
+    await page.getByRole('tab', { name: 'Add a service' }).click();
     await expect(page.getByRole('button', { name: /^Add Netflix/ })).toBeVisible();
   });
 
-  test('adds a bundle as one subscription', async ({ page }) => {
+  test('adds a bundle as one subscription', async ({ page, capture }) => {
     await page.goto('/services');
-    await page.getByRole('button', { name: /^Add Disney\+, Hulu & ESPN Select/ }).click();
+    await page.getByRole('tab', { name: 'Bundles' }).click();
+    const card = page.getByRole('listitem', { name: 'Disney+, Hulu & ESPN Select' });
+    await expect(card.getByText('Includes Disney+, Hulu, and ESPN Select')).toBeVisible();
+    await expect(card.getByText('$32.99')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await capture('services-bundles');
 
+    await card.getByRole('button', { name: 'Add Disney+, Hulu & ESPN Select' }).click();
     const bundle = page.getByRole('row', { name: 'Disney+, Hulu & ESPN Select', exact: true });
-    await expect(bundle.getByText('Disney+, Hulu, and ESPN+')).toBeVisible();
+    await expect(bundle.getByText('Disney+, Hulu, and ESPN Select')).toBeVisible();
     await expect(bundle.getByLabel('Disney+, Hulu & ESPN Select monthly price')).toHaveValue(
       '21.99',
     );

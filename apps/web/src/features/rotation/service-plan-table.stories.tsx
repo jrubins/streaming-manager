@@ -19,8 +19,9 @@ const meta = {
   args: {
     plannedCostCents: 899 + 2199,
     providerName: (key: string) =>
-      ({ netflix: 'Netflix', hulu: 'Hulu', 'disney-plus': 'Disney+', 'espn-plus': 'ESPN+' })[key] ??
-      key,
+      ({ netflix: 'Netflix', hulu: 'Hulu', 'disney-plus': 'Disney+', 'espn-plus': 'ESPN Select' })[
+        key
+      ] ?? key,
     onDone: fn(),
     rows: [
       {
@@ -71,7 +72,7 @@ export const Default: Story = {
     const body = within(canvasElement.ownerDocument.body);
     await expect(canvas.getByText('Switch plan')).toBeInTheDocument();
     await expect(canvas.getByText('Same titles for $11.00 less')).toBeInTheDocument();
-    await expect(canvas.getByText('Includes Disney+, Hulu, and ESPN+')).toBeInTheDocument();
+    await expect(canvas.getByText('Includes Disney+, Hulu, and ESPN Select')).toBeInTheDocument();
 
     await userEvent.click(
       canvas.getByRole('button', { name: 'Disney+, Hulu & ESPN Select actions' }),

@@ -10,7 +10,7 @@ const meta = {
     providers: PROVIDERS,
     onAdd: fn(),
     providerName: (key: string) =>
-      ({ 'disney-plus': 'Disney+', hulu: 'Hulu', 'espn-plus': 'ESPN+' })[key] ?? key,
+      ({ 'disney-plus': 'Disney+', hulu: 'Hulu', 'espn-plus': 'ESPN Select' })[key] ?? key,
   },
 } satisfies Meta<typeof ProviderPicker>;
 
@@ -23,7 +23,7 @@ export const Default: Story = {
     await expect(canvas.getByText('from $8.99')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: /^Add Starz/ }));
     await expect(args.onAdd).toHaveBeenCalledWith(expect.objectContaining({ key: 'starz' }));
-    await expect(canvas.getByText('Disney+, Hulu, and ESPN+')).toBeInTheDocument();
+    await expect(canvas.getByText('Disney+, Hulu, and ESPN Select')).toBeInTheDocument();
   },
 };
 

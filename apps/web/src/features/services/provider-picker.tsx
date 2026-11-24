@@ -33,7 +33,7 @@ export function ProviderPicker({
           >
             <ServiceLogo service={provider} className="size-10" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium">
+              <span className="line-clamp-2 block text-sm font-medium" title={provider.name}>
                 <span className="sr-only">Add </span>
                 {provider.name}
               </span>
