@@ -1,7 +1,6 @@
 import type { RotationState, Service, WatchlistShow } from '@app/shared';
 import { cn } from 'cn';
-import { Check, CirclePause, CirclePlay, Moon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Check, CircleCheck, CirclePause, CirclePlay, Moon } from 'lucide-react';
 import { formatList, formatPrice } from '@/lib/format';
 import { Poster } from './poster-strip';
 import { ServiceLogo } from './service-logo';
@@ -159,9 +158,8 @@ export function ServicePlanTable({
                 </td>
                 <td className="py-3.5 pr-5 pl-4 text-right">
                   {onDone && (state === 'pause' || state === 'resume') ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
+                    <button
+                      type="button"
                       disabled={pending}
                       onClick={() => onDone(row)}
                       aria-label={
@@ -169,9 +167,16 @@ export function ServicePlanTable({
                           ? `I've paused ${service.name}`
                           : `I've resumed ${service.name}`
                       }
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50',
+                        state === 'pause'
+                          ? 'text-pause hover:bg-pause-soft'
+                          : 'text-resume hover:bg-resume-soft',
+                      )}
                     >
-                      Mark done
-                    </Button>
+                      <CircleCheck className="size-4" aria-hidden />
+                      {state === 'pause' ? 'I paused it' : 'I resumed it'}
+                    </button>
                   ) : null}
                 </td>
               </tr>

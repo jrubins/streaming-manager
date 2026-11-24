@@ -23,50 +23,55 @@ export function SavingsHero({
   return (
     <section
       aria-label="Monthly cost"
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-hero-from to-hero-to p-6 text-hero-foreground shadow-lg sm:p-8"
+      className="rounded-2xl border border-border/70 bg-gradient-to-br from-accent/70 via-card to-card p-6 shadow-[0_1px_2px_rgb(0_0_0/0.04)] sm:px-8"
     >
-      <div aria-hidden className="absolute -top-16 -right-10 size-56 rounded-full bg-white/10" />
-      <div aria-hidden className="absolute -right-24 -bottom-24 size-64 rounded-full bg-white/5" />
-
-      <div className="relative flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
         <div>
-          <p className="text-sm font-medium opacity-80">
+          <p className="text-sm font-medium text-muted-foreground">
             {saving > 0
               ? 'Rotate this month and save'
               : saving < 0
                 ? 'Catching up on your list costs'
                 : 'Your services already match your list'}
           </p>
-          <p className="mt-2 text-5xl font-semibold tracking-tight tabular-nums">
+          <p className="mt-1 text-4xl font-semibold tracking-tight text-primary tabular-nums">
             {formatPrice(Math.abs(saving))}
-            <span className="ml-1 text-2xl font-medium opacity-80">/mo</span>
+            <span className="ml-1 text-lg font-medium text-muted-foreground">/mo</span>
           </p>
           {saving > 0 ? (
-            <p className="mt-1 text-sm opacity-80">{formatPrice(saving * 12)} a year</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {formatPrice(saving * 12)} a year
+            </p>
           ) : null}
         </div>
 
         <dl className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <div>
-            <dt className="text-xs font-medium tracking-wide uppercase opacity-70">Paying now</dt>
+            <dt className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
+              Paying now
+            </dt>
             <dd className="text-lg font-semibold tabular-nums">
               {formatPrice(currentCostCents)}
-              <span className="ml-2 text-sm font-normal opacity-70">{services(activeCount)}</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                {services(activeCount)}
+              </span>
             </dd>
           </div>
-          <ArrowRight className="size-5 opacity-60" aria-hidden />
+          <ArrowRight className="size-5 text-muted-foreground" aria-hidden />
           <div>
-            <dt className="text-xs font-medium tracking-wide uppercase opacity-70">
+            <dt className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
               With this plan
             </dt>
             <dd className="text-lg font-semibold tabular-nums">
               {formatPrice(plannedCostCents)}
-              <span className="ml-2 text-sm font-normal opacity-70">{services(plannedCount)}</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                {services(plannedCount)}
+              </span>
             </dd>
           </div>
         </dl>
         {unpricedCount > 0 ? (
-          <p className="basis-full text-xs opacity-70">
+          <p className="basis-full text-xs text-muted-foreground">
             {services(unpricedCount)} without a price {unpricedCount === 1 ? "isn't" : "aren't"}{' '}
             counted.
           </p>

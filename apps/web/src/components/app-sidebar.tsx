@@ -107,15 +107,15 @@ export function AppSidebar({
           <SidebarGroup className="mt-auto">
             <Link
               to="/"
-              className="block rounded-xl bg-gradient-to-br from-hero-from to-hero-to p-4 text-hero-foreground shadow-sm"
+              className="block rounded-xl border border-sidebar-border bg-card p-4 transition-colors hover:bg-accent/50"
             >
-              <span className="block text-xs font-medium tracking-wide uppercase opacity-80">
+              <span className="block text-xs font-medium tracking-wide text-muted-foreground uppercase">
                 This month
               </span>
-              <span className="mt-1 block text-xl font-semibold tabular-nums">
+              <span className="mt-1 block text-lg font-semibold text-primary tabular-nums">
                 Save {formatPrice(monthlySavingsCents)}
               </span>
-              <span className="block text-xs opacity-80">by following your plan</span>
+              <span className="block text-xs text-muted-foreground">by following your plan</span>
             </Link>
           </SidebarGroup>
         ) : null}
