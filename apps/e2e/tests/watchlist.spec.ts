@@ -37,4 +37,22 @@ test.describe('watchlist page', () => {
     await page.waitForLoadState('networkidle');
     await capture('watchlist');
   });
+
+  test('shows the most popular matches first, in a list that scrolls on its own', async ({
+    page,
+    capture,
+  }) => {
+    await page.goto('/watchlist');
+    await page.getByLabel('Search for a show or movie').fill('a');
+    const results = page.getByRole('list', { name: 'Search results' });
+    await expect(results.getByRole('listitem').first()).toContainText('Glass Orchard');
+    await expect(page.getByText(/titles, most popular first/)).toBeVisible();
+
+    const scrolls = await results.evaluate((list) => list.scrollHeight > list.clientHeight);
+    expect(scrolls).toBe(true);
+    // The tabs below the results stay on the first screen.
+    await expect(page.getByRole('tab', { name: /To watch/ })).toBeInViewport();
+    await page.waitForLoadState('networkidle');
+    await capture('watchlist-search-many');
+  });
 });

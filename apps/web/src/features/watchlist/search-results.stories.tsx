@@ -42,3 +42,22 @@ export const Default: Story = {
 };
 
 export const NoResults: Story = { args: { results: [] } };
+
+/** A long list scrolls inside its own box instead of pushing the page down. */
+export const ManyResults: Story = {
+  args: {
+    added: new Set(),
+    results: Array.from({ length: 20 }, (_, i) => ({
+      tmdbId: 2000 + i,
+      mediaType: i % 3 === 0 ? ('movie' as const) : ('tv' as const),
+      title: `Harbor Title ${i + 1}`,
+      year: 2026 - i,
+      posterUrl: null,
+      overview: '',
+    })),
+  },
+  play: async ({ canvasElement }) => {
+    const list = within(canvasElement).getByRole('list', { name: 'Search results' });
+    await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+  },
+};

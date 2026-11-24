@@ -8,7 +8,7 @@ import type {
 import type { HouseholdService } from '../household/household.service.ts';
 import { manageUrl } from './manage-links.ts';
 import { bundleByKey, bundlesFor, plansFor, PRICES_AS_OF } from './price-catalog.ts';
-import type { TmdbClient } from './tmdb.client.ts';
+import type { TmdbClient, TmdbTitle } from './tmdb.client.ts';
 
 /** A service or bundle with its plans, as the catalog and the plan use it. */
 export interface Offering {
@@ -108,7 +108,7 @@ export function createCatalogService(tmdb: TmdbClient, households: HouseholdServ
     },
 
     async search(query: string): Promise<TitleSearchResult[]> {
-      const titles = await tmdb.search(query);
+      const titles = rankSearchResults(query, await tmdb.search(query));
       return titles.slice(0, 20).map((title) => ({
         tmdbId: title.tmdbId,
         mediaType: title.mediaType,
@@ -119,6 +119,30 @@ export function createCatalogService(tmdb: TmdbClient, households: HouseholdServ
       }));
     },
   };
+}
+
+/**
+ * TMDB orders search results by text relevance, which often puts obscure titles first. Put
+ * exact title matches first, then the most popular, then the newest, so what people are
+ * looking for is usually near the top.
+ */
+function rankSearchResults(query: string, titles: readonly TmdbTitle[]): TmdbTitle[] {
+  const wanted = normalizeTitle(query);
+  const exact = (title: TmdbTitle) => (normalizeTitle(title.title) === wanted ? 0 : 1);
+  return [...titles].sort(
+    (a, b) =>
+      exact(a) - exact(b) ||
+      b.popularity - a.popularity ||
+      (b.year ?? 0) - (a.year ?? 0) ||
+      a.tmdbId - b.tmdbId,
+  );
+}
+
+function normalizeTitle(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
 }
 
 export type CatalogService = ReturnType<typeof createCatalogService>;
