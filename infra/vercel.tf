@@ -104,6 +104,16 @@ resource "vercel_project_environment_variable" "workos_api_key" {
   sensitive        = true
 }
 
+resource "vercel_project_environment_variable" "tmdb_api_token" {
+  project_id       = vercel_project.api.id
+  key              = "TMDB_API_TOKEN"
+  comment          = "TMDB API Read Access Token for title search and availability (managed by Terraform)"
+  value_wo         = var.tmdb_api_token
+  value_wo_version = var.tmdb_api_token_version
+  target           = local.production
+  sensitive        = true
+}
+
 # Encrypts the session cookie. Generated here and written straight to Vercel: it exists nowhere
 # else, and a new one is sent only when cookie_password_version is bumped.
 ephemeral "random_password" "cookie" {

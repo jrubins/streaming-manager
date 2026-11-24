@@ -4,6 +4,8 @@ import { defineConfig, devices } from '@playwright/test';
 // They use their own ports, so they can run while `pnpm dev` is running.
 const API_PORT = 3100;
 const WEB_PORT = 5174;
+const TMDB_STUB_PORT = 3200;
+const TMDB_STUB_URL = `http://localhost:${TMDB_STUB_PORT}`;
 export const API_URL = `http://localhost:${API_PORT}`;
 
 const testDatabaseUrl = process.env['TEST_DATABASE_URL'];
@@ -30,6 +32,14 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
+      name: 'tmdb-stub',
+      command: 'pnpm --filter @app/api tmdb-stub',
+      url: `${TMDB_STUB_URL}/t/p/w92/logo/netflix.svg`,
+      env: { PORT: String(TMDB_STUB_PORT) },
+      reuseExistingServer: !isCI,
+      timeout: 60_000,
+    },
+    {
       name: 'api',
       // Migrate the test database, then start the API on it.
       command: 'pnpm --filter @app/db migrate --yes && pnpm --filter @app/api start',
@@ -49,6 +59,10 @@ export default defineConfig({
         WORKOS_COOKIE_PASSWORD: '',
         AUTHKIT_DOMAIN: '',
         ALLOWED_USER_IDS: '',
+        // Never call TMDB from tests: a local stub with fictional titles stands in for it.
+        TMDB_API_TOKEN: 'e2e-tmdb-token-0123456789',
+        TMDB_API_URL: TMDB_STUB_URL,
+        TMDB_IMAGE_URL: `${TMDB_STUB_URL}/t/p`,
       },
       reuseExistingServer: !isCI,
       timeout: 120_000,

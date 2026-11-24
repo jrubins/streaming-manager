@@ -24,6 +24,13 @@
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
   --chart-1: oklch(0.646 0.222 41.116);
+  /* Rotation states: a strong colour for text and icons, and a soft one for backgrounds. */
+  --keep: oklch(0.48 0.13 155);
+  --keep-soft: oklch(0.962 0.035 155);
+  --pause: oklch(0.5 0.13 55);
+  --pause-soft: oklch(0.97 0.045 80);
+  --resume: oklch(0.5 0.18 260);
+  --resume-soft: oklch(0.96 0.03 260);
 }
 
 .dark {
@@ -46,6 +53,12 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.552 0.016 285.938);
   --chart-1: oklch(0.488 0.243 264.376);
+  --keep: oklch(0.8 0.15 155);
+  --keep-soft: oklch(0.3 0.05 155);
+  --pause: oklch(0.83 0.13 75);
+  --pause-soft: oklch(0.31 0.05 70);
+  --resume: oklch(0.8 0.11 260);
+  --resume-soft: oklch(0.3 0.06 260);
 }
 
 @theme inline {
@@ -72,6 +85,12 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
+  --color-keep: var(--keep);
+  --color-keep-soft: var(--keep-soft);
+  --color-pause: var(--pause);
+  --color-pause-soft: var(--pause-soft);
+  --color-resume: var(--resume);
+  --color-resume-soft: var(--resume-soft);
 }
 
 @layer base {

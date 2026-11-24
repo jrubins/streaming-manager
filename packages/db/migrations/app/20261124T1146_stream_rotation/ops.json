@@ -1,0 +1,783 @@
+[
+  {
+    "id": "dropTable.Item",
+    "label": "Drop table \"Item\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Item\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Item\""
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Item\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop table \"Item\"",
+        "sql": "DROP TABLE \"public\".\"Item\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Item\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Item\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Item\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Household",
+    "label": "Create table \"Household\"",
+    "summary": "Creates table \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Household\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Household\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Household\"",
+        "sql": "CREATE TABLE \"public\".\"Household\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"inviteCode\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"region\" text DEFAULT 'US' NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Household\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Household\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Household\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.HouseholdMember",
+    "label": "Create table \"HouseholdMember\"",
+    "summary": "Creates table \"HouseholdMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "HouseholdMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"HouseholdMember\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"HouseholdMember\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"HouseholdMember\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"HouseholdMember\"",
+        "sql": "CREATE TABLE \"public\".\"HouseholdMember\" (\n  \"displayName\" text,\n  \"householdId\" int4 NOT NULL,\n  \"joinedAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"userId\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"HouseholdMember\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"HouseholdMember\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"HouseholdMember\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Service",
+    "label": "Create table \"Service\"",
+    "summary": "Creates table \"Service\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Service\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Service\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Service\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Service\"",
+        "sql": "CREATE TABLE \"public\".\"Service\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"householdId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"logoPath\" text,\n  \"monthlyPriceCents\" int4,\n  \"name\" text NOT NULL,\n  \"planName\" text,\n  \"priceSource\" text,\n  \"providerKey\" text NOT NULL,\n  \"status\" text NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"Service_priceSource_check_fb78c88b\" CHECK (\"priceSource\" IN ('catalog', 'manual', 'invoice')),\n  CONSTRAINT \"Service_status_check_a6adec7a\" CHECK (\"status\" IN ('active', 'paused'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Service\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Service\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Service\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.WatchlistShow",
+    "label": "Create table \"WatchlistShow\"",
+    "summary": "Creates table \"WatchlistShow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "WatchlistShow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"WatchlistShow\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistShow\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"WatchlistShow\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"WatchlistShow\"",
+        "sql": "CREATE TABLE \"public\".\"WatchlistShow\" (\n  \"addedByUserId\" text NOT NULL,\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"householdId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"mediaType\" text NOT NULL,\n  \"posterPath\" text,\n  \"providerKeys\" text[] NOT NULL,\n  \"providersRefreshedAt\" timestamptz(3) NOT NULL,\n  \"providersRegion\" text NOT NULL,\n  \"title\" text NOT NULL,\n  \"tmdbId\" int4 NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  \"watched\" bool DEFAULT false NOT NULL,\n  \"year\" int4,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"WatchlistShow_mediaType_check_adfa15b9\" CHECK (\"mediaType\" IN ('tv', 'movie')),\n  CONSTRAINT \"WatchlistShow_providerKeys_elem_not_null_be2500c5\" CHECK (array_position(\"providerKeys\", NULL) IS NULL)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"WatchlistShow\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistShow\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"WatchlistShow\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "unique.Household.Household_inviteCode_key",
+    "label": "Add unique constraint on \"Household\" (inviteCode)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Household_inviteCode_key",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Household_inviteCode_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Household_inviteCode_key",
+          "public",
+          "\"public\".\"Household\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Household_inviteCode_key\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Household_inviteCode_key\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD CONSTRAINT \"Household_inviteCode_key\" UNIQUE (\"inviteCode\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Household_inviteCode_key\" exists on (inviteCode)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Household_inviteCode_key",
+          "public",
+          "\"public\".\"Household\"",
+          "u",
+          "[\"inviteCode\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Service.Service_householdId_providerKey_key",
+    "label": "Add unique constraint on \"Service\" (householdId, providerKey)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Service_householdId_providerKey_key",
+        "table": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Service_householdId_providerKey_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Service_householdId_providerKey_key",
+          "public",
+          "\"public\".\"Service\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Service_householdId_providerKey_key\" on \"Service\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Service_householdId_providerKey_key\"",
+        "sql": "ALTER TABLE \"public\".\"Service\" ADD CONSTRAINT \"Service_householdId_providerKey_key\" UNIQUE (\"householdId\", \"providerKey\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Service_householdId_providerKey_key\" exists on (householdId, providerKey)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Service_householdId_providerKey_key",
+          "public",
+          "\"public\".\"Service\"",
+          "u",
+          "[\"householdId\",\"providerKey\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.WatchlistShow.WatchlistShow_householdId_mediaType_tmdbId_key",
+    "label": "Add unique constraint on \"WatchlistShow\" (householdId, mediaType, tmdbId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "WatchlistShow_householdId_mediaType_tmdbId_key",
+        "table": "WatchlistShow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"WatchlistShow_householdId_mediaType_tmdbId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WatchlistShow_householdId_mediaType_tmdbId_key",
+          "public",
+          "\"public\".\"WatchlistShow\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"WatchlistShow_householdId_mediaType_tmdbId_key\" on \"WatchlistShow\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"WatchlistShow_householdId_mediaType_tmdbId_key\"",
+        "sql": "ALTER TABLE \"public\".\"WatchlistShow\" ADD CONSTRAINT \"WatchlistShow_householdId_mediaType_tmdbId_key\" UNIQUE (\"householdId\", \"mediaType\", \"tmdbId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"WatchlistShow_householdId_mediaType_tmdbId_key\" exists on (householdId, mediaType, tmdbId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "WatchlistShow_householdId_mediaType_tmdbId_key",
+          "public",
+          "\"public\".\"WatchlistShow\"",
+          "u",
+          "[\"householdId\",\"mediaType\",\"tmdbId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.HouseholdMember.HouseholdMember_householdId_idx_fb33d798",
+    "label": "Create index \"HouseholdMember_householdId_idx_fb33d798\" on \"HouseholdMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "HouseholdMember_householdId_idx_fb33d798",
+        "table": "HouseholdMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"HouseholdMember_householdId_idx_fb33d798\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"HouseholdMember_householdId_idx_fb33d798\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"HouseholdMember_householdId_idx_fb33d798\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"HouseholdMember_householdId_idx_fb33d798\"",
+        "sql": "CREATE INDEX \"HouseholdMember_householdId_idx_fb33d798\" ON \"public\".\"HouseholdMember\" (\"householdId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"HouseholdMember_householdId_idx_fb33d798\" exists on \"HouseholdMember\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"HouseholdMember_householdId_idx_fb33d798\"",
+          "i",
+          "I",
+          "\"public\".\"HouseholdMember\"",
+          "btree",
+          "[\"householdId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.HouseholdMember.HouseholdMember_householdId_joinedAt_idx_9aa29de0",
+    "label": "Create index \"HouseholdMember_householdId_joinedAt_idx_9aa29de0\" on \"HouseholdMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "HouseholdMember_householdId_joinedAt_idx_9aa29de0",
+        "table": "HouseholdMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"HouseholdMember_householdId_joinedAt_idx_9aa29de0\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"HouseholdMember_householdId_joinedAt_idx_9aa29de0\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"HouseholdMember_householdId_joinedAt_idx_9aa29de0\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"HouseholdMember_householdId_joinedAt_idx_9aa29de0\"",
+        "sql": "CREATE INDEX \"HouseholdMember_householdId_joinedAt_idx_9aa29de0\" ON \"public\".\"HouseholdMember\" (\"householdId\", \"joinedAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"HouseholdMember_householdId_joinedAt_idx_9aa29de0\" exists on \"HouseholdMember\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"HouseholdMember_householdId_joinedAt_idx_9aa29de0\"",
+          "i",
+          "I",
+          "\"public\".\"HouseholdMember\"",
+          "btree",
+          "[\"householdId\",\"joinedAt\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Service.Service_householdId_idx_fb33d798",
+    "label": "Create index \"Service_householdId_idx_fb33d798\" on \"Service\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Service_householdId_idx_fb33d798",
+        "table": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Service_householdId_idx_fb33d798\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Service_householdId_idx_fb33d798\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Service_householdId_idx_fb33d798\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Service_householdId_idx_fb33d798\"",
+        "sql": "CREATE INDEX \"Service_householdId_idx_fb33d798\" ON \"public\".\"Service\" (\"householdId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Service_householdId_idx_fb33d798\" exists on \"Service\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Service_householdId_idx_fb33d798\"",
+          "i",
+          "I",
+          "\"public\".\"Service\"",
+          "btree",
+          "[\"householdId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.WatchlistShow.WatchlistShow_householdId_createdAt_idx_6b6c436d",
+    "label": "Create index \"WatchlistShow_householdId_createdAt_idx_6b6c436d\" on \"WatchlistShow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "WatchlistShow_householdId_createdAt_idx_6b6c436d",
+        "table": "WatchlistShow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"WatchlistShow_householdId_createdAt_idx_6b6c436d\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistShow_householdId_createdAt_idx_6b6c436d\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"WatchlistShow_householdId_createdAt_idx_6b6c436d\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"WatchlistShow_householdId_createdAt_idx_6b6c436d\"",
+        "sql": "CREATE INDEX \"WatchlistShow_householdId_createdAt_idx_6b6c436d\" ON \"public\".\"WatchlistShow\" (\"householdId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"WatchlistShow_householdId_createdAt_idx_6b6c436d\" exists on \"WatchlistShow\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistShow_householdId_createdAt_idx_6b6c436d\"",
+          "i",
+          "I",
+          "\"public\".\"WatchlistShow\"",
+          "btree",
+          "[\"householdId\",\"createdAt\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.WatchlistShow.WatchlistShow_householdId_idx_fb33d798",
+    "label": "Create index \"WatchlistShow_householdId_idx_fb33d798\" on \"WatchlistShow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "WatchlistShow_householdId_idx_fb33d798",
+        "table": "WatchlistShow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"WatchlistShow_householdId_idx_fb33d798\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistShow_householdId_idx_fb33d798\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"WatchlistShow_householdId_idx_fb33d798\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"WatchlistShow_householdId_idx_fb33d798\"",
+        "sql": "CREATE INDEX \"WatchlistShow_householdId_idx_fb33d798\" ON \"public\".\"WatchlistShow\" (\"householdId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"WatchlistShow_householdId_idx_fb33d798\" exists on \"WatchlistShow\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistShow_householdId_idx_fb33d798\"",
+          "i",
+          "I",
+          "\"public\".\"WatchlistShow\"",
+          "btree",
+          "[\"householdId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.HouseholdMember.HouseholdMember_householdId_fkey",
+    "label": "Add foreign key \"HouseholdMember_householdId_fkey\" on \"HouseholdMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "HouseholdMember_householdId_fkey",
+        "table": "HouseholdMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"HouseholdMember_householdId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "HouseholdMember_householdId_fkey",
+          "public",
+          "\"public\".\"HouseholdMember\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"HouseholdMember_householdId_fkey\" on \"HouseholdMember\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"HouseholdMember_householdId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"HouseholdMember\"\nADD CONSTRAINT \"HouseholdMember_householdId_fkey\"\nFOREIGN KEY (\"householdId\")\nREFERENCES \"public\".\"Household\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"HouseholdMember_householdId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "HouseholdMember_householdId_fkey",
+          "public",
+          "\"public\".\"HouseholdMember\"",
+          "f",
+          "[\"householdId\"]",
+          "\"public\".\"Household\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Service.Service_householdId_fkey",
+    "label": "Add foreign key \"Service_householdId_fkey\" on \"Service\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Service_householdId_fkey",
+        "table": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Service_householdId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Service_householdId_fkey",
+          "public",
+          "\"public\".\"Service\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Service_householdId_fkey\" on \"Service\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Service_householdId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Service\"\nADD CONSTRAINT \"Service_householdId_fkey\"\nFOREIGN KEY (\"householdId\")\nREFERENCES \"public\".\"Household\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Service_householdId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Service_householdId_fkey",
+          "public",
+          "\"public\".\"Service\"",
+          "f",
+          "[\"householdId\"]",
+          "\"public\".\"Household\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.WatchlistShow.WatchlistShow_householdId_fkey",
+    "label": "Add foreign key \"WatchlistShow_householdId_fkey\" on \"WatchlistShow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "WatchlistShow_householdId_fkey",
+        "table": "WatchlistShow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"WatchlistShow_householdId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WatchlistShow_householdId_fkey",
+          "public",
+          "\"public\".\"WatchlistShow\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"WatchlistShow_householdId_fkey\" on \"WatchlistShow\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"WatchlistShow_householdId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"WatchlistShow\"\nADD CONSTRAINT \"WatchlistShow_householdId_fkey\"\nFOREIGN KEY (\"householdId\")\nREFERENCES \"public\".\"Household\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"WatchlistShow_householdId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "WatchlistShow_householdId_fkey",
+          "public",
+          "\"public\".\"WatchlistShow\"",
+          "f",
+          "[\"householdId\"]",
+          "\"public\".\"Household\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  }
+]

@@ -3,14 +3,89 @@
 // Data contract: the source of truth for the database schema.
 // After editing: `pnpm --filter @app/db emit`, then `pnpm --filter @app/db migration:plan`.
 
-// Example model, used by the example API routes and web page. Replace it with your own.
-model Item {
-  id        Int                @id @default(autoincrement())
-  // Owner: the authenticated user's ID (WorkOS `sub`). Every query filters by it.
-  userId    String
-  name      String
-  createdAt DateTime           @default(now()) @onCreate(now())
-  updatedAt temporal.UpdatedAt
+enum ServiceStatus {
+  @@type("pg/text@1")
+  active = "active"
+  paused = "paused"
+}
 
-  @@index([userId, createdAt])
+enum PriceSource {
+  @@type("pg/text@1")
+  catalog = "catalog"
+  manual  = "manual"
+  invoice = "invoice"
+}
+
+enum MediaType {
+  @@type("pg/text@1")
+  tv    = "tv"
+  movie = "movie"
+}
+
+// Owns all data. Members sign in separately and share its services and watchlist.
+model Household {
+  id         Int                @id @default(autoincrement())
+  name       String
+  // ISO 3166-1 alpha-2 country: which country's streaming catalogs apply.
+  region     String             @default("US")
+  // Shared with people who should join this household.
+  inviteCode String             @unique
+  createdAt  DateTime           @default(now()) @onCreate(now())
+  updatedAt  temporal.UpdatedAt
+  members    HouseholdMember[]
+  services   Service[]
+  shows      WatchlistShow[]
+}
+
+// A signed-in user's (WorkOS `sub`) membership. A user belongs to one household at a time.
+model HouseholdMember {
+  userId      String    @id
+  householdId Int
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  displayName String?
+  joinedAt    DateTime  @default(now()) @onCreate(now())
+
+  @@index([householdId, joinedAt])
+}
+
+// A streaming service the household subscribes to, active or paused.
+model Service {
+  id                Int                @id @default(autoincrement())
+  householdId       Int
+  household         Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  // Normalized provider key, e.g. "netflix" (see apps/api/src/features/catalog).
+  providerKey       String
+  name              String
+  logoPath          String?
+  planName          String?
+  monthlyPriceCents Int?
+  priceSource       PriceSource?
+  status            ServiceStatus
+  createdAt         DateTime           @default(now()) @onCreate(now())
+  updatedAt         temporal.UpdatedAt
+
+  @@unique([householdId, providerKey])
+}
+
+// A show or movie on the household's watchlist.
+model WatchlistShow {
+  id                   Int                @id @default(autoincrement())
+  householdId          Int
+  household            Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  tmdbId               Int
+  mediaType            MediaType
+  title                String
+  year                 Int?
+  posterPath           String?
+  watched              Boolean            @default(false)
+  // Provider keys it streams on by subscription in `providersRegion`.
+  providerKeys         String[]
+  providersRegion      String
+  providersRefreshedAt DateTime
+  addedByUserId        String
+  createdAt            DateTime           @default(now()) @onCreate(now())
+  updatedAt            temporal.UpdatedAt
+
+  @@unique([householdId, mediaType, tmdbId])
+  @@index([householdId, createdAt])
 }

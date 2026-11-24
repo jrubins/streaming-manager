@@ -23,9 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'d66c50f1ad3d9edd716db2f69f1e229877832c8c35121487a8f8e43df1253466'>;
+  StorageHashBase<'2a05321a727abc4e4171019eeaff87c4011a4167d6fdadf0f35184c0307d836b'>;
 export type ExecutionHash =
-  ExecutionHashBase<'d388457b28c2848c8802c3f452f18b5904772d0acccd84bc3c8e1aa5e02d2104'>;
+  ExecutionHashBase<'c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -275,7 +275,25 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
   : Encoded;
 type ParameterizedOutputTypeFunctions = PgParameterizedOutputTypes;
 
-type FieldTypeOverrides = {};
+type FieldTypeOverrides = {
+  readonly public: {
+    readonly models: {
+      readonly Service: {
+        readonly priceSource: {
+          readonly output: 'catalog' | 'manual' | 'invoice';
+          readonly input: 'catalog' | 'manual' | 'invoice';
+        };
+        readonly status: {
+          readonly output: 'active' | 'paused';
+          readonly input: 'active' | 'paused';
+        };
+      };
+      readonly WatchlistShow: {
+        readonly mediaType: { readonly output: 'tv' | 'movie'; readonly input: 'tv' | 'movie' };
+      };
+    };
+  };
+};
 export type FieldOutputTypes = FieldTypesFromDomain<
   ContractBase['domain']['namespaces'],
   CodecTypes,
@@ -292,7 +310,23 @@ export type FieldInputTypes = FieldTypesFromDomain<
   'input',
   ContractBase['storage']['namespaces']
 >;
-type ColumnTypeOverrides = {};
+type ColumnTypeOverrides = {
+  readonly public: {
+    readonly Service: {
+      readonly priceSource: {
+        readonly output: 'catalog' | 'manual' | 'invoice';
+        readonly input: 'catalog' | 'manual' | 'invoice';
+      };
+      readonly status: {
+        readonly output: 'active' | 'paused';
+        readonly input: 'active' | 'paused';
+      };
+    };
+    readonly WatchlistShow: {
+      readonly mediaType: { readonly output: 'tv' | 'movie'; readonly input: 'tv' | 'movie' };
+    };
+  };
+};
 export type StorageColumnTypes = ColumnTypesFromStorage<
   ContractBase['storage'],
   CodecTypes,
@@ -309,19 +343,67 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
 >;
 
 export namespace Models {
-  export type public_Item = {
-    createdAt: FieldOutputTypes['public']['Item']['createdAt'];
-    id: FieldOutputTypes['public']['Item']['id'];
-    name: FieldOutputTypes['public']['Item']['name'];
-    updatedAt: FieldOutputTypes['public']['Item']['updatedAt'];
-    userId: FieldOutputTypes['public']['Item']['userId'];
-    readonly [RelationKeys]?: never;
+  export type public_Household = {
+    createdAt: FieldOutputTypes['public']['Household']['createdAt'];
+    id: FieldOutputTypes['public']['Household']['id'];
+    inviteCode: FieldOutputTypes['public']['Household']['inviteCode'];
+    name: FieldOutputTypes['public']['Household']['name'];
+    region: FieldOutputTypes['public']['Household']['region'];
+    updatedAt: FieldOutputTypes['public']['Household']['updatedAt'];
+    members: public_HouseholdMember[];
+    services: public_Service[];
+    shows: public_WatchlistShow[];
+    readonly [RelationKeys]?: 'members' | 'services' | 'shows';
+  };
+  export type public_HouseholdMember = {
+    displayName: FieldOutputTypes['public']['HouseholdMember']['displayName'];
+    householdId: FieldOutputTypes['public']['HouseholdMember']['householdId'];
+    joinedAt: FieldOutputTypes['public']['HouseholdMember']['joinedAt'];
+    userId: FieldOutputTypes['public']['HouseholdMember']['userId'];
+    household: public_Household;
+    readonly [RelationKeys]?: 'household';
+  };
+  export type public_Service = {
+    createdAt: FieldOutputTypes['public']['Service']['createdAt'];
+    householdId: FieldOutputTypes['public']['Service']['householdId'];
+    id: FieldOutputTypes['public']['Service']['id'];
+    logoPath: FieldOutputTypes['public']['Service']['logoPath'];
+    monthlyPriceCents: FieldOutputTypes['public']['Service']['monthlyPriceCents'];
+    name: FieldOutputTypes['public']['Service']['name'];
+    planName: FieldOutputTypes['public']['Service']['planName'];
+    priceSource: FieldOutputTypes['public']['Service']['priceSource'];
+    providerKey: FieldOutputTypes['public']['Service']['providerKey'];
+    status: FieldOutputTypes['public']['Service']['status'];
+    updatedAt: FieldOutputTypes['public']['Service']['updatedAt'];
+    household: public_Household;
+    readonly [RelationKeys]?: 'household';
+  };
+  export type public_WatchlistShow = {
+    addedByUserId: FieldOutputTypes['public']['WatchlistShow']['addedByUserId'];
+    createdAt: FieldOutputTypes['public']['WatchlistShow']['createdAt'];
+    householdId: FieldOutputTypes['public']['WatchlistShow']['householdId'];
+    id: FieldOutputTypes['public']['WatchlistShow']['id'];
+    mediaType: FieldOutputTypes['public']['WatchlistShow']['mediaType'];
+    posterPath: FieldOutputTypes['public']['WatchlistShow']['posterPath'];
+    providerKeys: FieldOutputTypes['public']['WatchlistShow']['providerKeys'];
+    providersRefreshedAt: FieldOutputTypes['public']['WatchlistShow']['providersRefreshedAt'];
+    providersRegion: FieldOutputTypes['public']['WatchlistShow']['providersRegion'];
+    title: FieldOutputTypes['public']['WatchlistShow']['title'];
+    tmdbId: FieldOutputTypes['public']['WatchlistShow']['tmdbId'];
+    updatedAt: FieldOutputTypes['public']['WatchlistShow']['updatedAt'];
+    watched: FieldOutputTypes['public']['WatchlistShow']['watched'];
+    year: FieldOutputTypes['public']['WatchlistShow']['year'];
+    household: public_Household;
+    readonly [RelationKeys]?: 'household';
   };
 }
 
 export declare const models: {
   public: {
-    Item: Models.public_Item;
+    Household: Models.public_Household;
+    HouseholdMember: Models.public_HouseholdMember;
+    Service: Models.public_Service;
+    WatchlistShow: Models.public_WatchlistShow;
   };
 };
 
@@ -343,7 +425,7 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly Item: {
+            readonly Household: {
               columns: {
                 readonly createdAt: {
                   readonly dataType: 'pg/timestamptz';
@@ -363,7 +445,164 @@ type ContractBase = Omit<
                   };
                   readonly many: false;
                 };
+                readonly inviteCode: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
                 readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly region: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'US'>;
+                  };
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['inviteCode'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+            readonly HouseholdMember: {
+              columns: {
+                readonly displayName: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly householdId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly joinedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['userId'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'HouseholdMember_householdId_idx_fb33d798';
+                  readonly prefix: 'HouseholdMember_householdId_idx';
+                  readonly columns: readonly ['householdId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'HouseholdMember_householdId_joinedAt_idx_9aa29de0';
+                  readonly prefix: 'HouseholdMember_householdId_joinedAt_idx';
+                  readonly columns: readonly ['householdId', 'joinedAt'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'HouseholdMember';
+                    readonly columns: readonly ['householdId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Household';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly Service: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly householdId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly logoPath: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly monthlyPriceCents: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly planName: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly priceSource: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly providerKey: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly status: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
@@ -376,24 +615,177 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
-                readonly userId: {
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['householdId', 'providerKey'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'Service_householdId_idx_fb33d798';
+                  readonly prefix: 'Service_householdId_idx';
+                  readonly columns: readonly ['householdId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Service';
+                    readonly columns: readonly ['householdId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Household';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly WatchlistShow: {
+              columns: {
+                readonly addedByUserId: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly householdId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly mediaType: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly posterPath: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly providerKeys: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: { readonly elementNullable: false };
+                };
+                readonly providersRefreshedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly providersRegion: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly title: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly tmdbId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly watched: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly year: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
+              uniques: readonly [
+                { readonly columns: readonly ['householdId', 'mediaType', 'tmdbId'] },
+              ];
               indexes: readonly [
                 {
-                  readonly name: 'Item_userId_createdAt_idx_f726f04a';
-                  readonly prefix: 'Item_userId_createdAt_idx';
-                  readonly columns: readonly ['userId', 'createdAt'];
+                  readonly name: 'WatchlistShow_householdId_createdAt_idx_6b6c436d';
+                  readonly prefix: 'WatchlistShow_householdId_createdAt_idx';
+                  readonly columns: readonly ['householdId', 'createdAt'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'WatchlistShow_householdId_idx_fb33d798';
+                  readonly prefix: 'WatchlistShow_householdId_idx';
+                  readonly columns: readonly ['householdId'];
                   readonly unique: false;
                 },
               ];
-              foreignKeys: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'WatchlistShow';
+                    readonly columns: readonly ['householdId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Household';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+          };
+          readonly valueSet: {
+            readonly MediaType: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['tv', 'movie'];
+            };
+            readonly PriceSource: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['catalog', 'manual', 'invoice'];
+            };
+            readonly ServiceStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['active', 'paused'];
             };
           };
         };
@@ -406,13 +798,22 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly Item: { readonly namespace: 'public' & NamespaceId; readonly model: 'Item' };
+    readonly Household: { readonly namespace: 'public' & NamespaceId; readonly model: 'Household' };
+    readonly HouseholdMember: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'HouseholdMember';
+    };
+    readonly Service: { readonly namespace: 'public' & NamespaceId; readonly model: 'Service' };
+    readonly WatchlistShow: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'WatchlistShow';
+    };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Item: {
+          readonly Household: {
             readonly fields: {
               readonly createdAt: {
                 readonly nullable: false;
@@ -426,11 +827,86 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
+              readonly inviteCode: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly name: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly region: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly members: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'HouseholdMember';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['householdId'];
+                };
+              };
+              readonly services: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Service';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['householdId'];
+                };
+              };
+              readonly shows: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'WatchlistShow';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['householdId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Household';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly inviteCode: { readonly column: 'inviteCode' };
+                readonly name: { readonly column: 'name' };
+                readonly region: { readonly column: 'region' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly HouseholdMember: {
+            readonly fields: {
+              readonly displayName: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly householdId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly joinedAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -443,19 +919,264 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly household: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Household';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['householdId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
             readonly storage: {
-              readonly table: 'Item';
+              readonly table: 'HouseholdMember';
               readonly namespaceId: 'public';
               readonly fields: {
-                readonly createdAt: { readonly column: 'createdAt' };
-                readonly id: { readonly column: 'id' };
-                readonly name: { readonly column: 'name' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly displayName: { readonly column: 'displayName' };
+                readonly householdId: { readonly column: 'householdId' };
+                readonly joinedAt: { readonly column: 'joinedAt' };
                 readonly userId: { readonly column: 'userId' };
               };
             };
           };
+          readonly Service: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly householdId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly logoPath: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly monthlyPriceCents: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly planName: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly priceSource: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly providerKey: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly household: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Household';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['householdId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Service';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly householdId: { readonly column: 'householdId' };
+                readonly id: { readonly column: 'id' };
+                readonly logoPath: { readonly column: 'logoPath' };
+                readonly monthlyPriceCents: { readonly column: 'monthlyPriceCents' };
+                readonly name: { readonly column: 'name' };
+                readonly planName: { readonly column: 'planName' };
+                readonly priceSource: { readonly column: 'priceSource' };
+                readonly providerKey: { readonly column: 'providerKey' };
+                readonly status: { readonly column: 'status' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly WatchlistShow: {
+            readonly fields: {
+              readonly addedByUserId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly householdId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly mediaType: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly posterPath: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly providerKeys: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: { readonly elementNullable: false };
+              };
+              readonly providersRefreshedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly providersRegion: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly title: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly tmdbId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly watched: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly year: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly household: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Household';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['householdId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'WatchlistShow';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly addedByUserId: { readonly column: 'addedByUserId' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly householdId: { readonly column: 'householdId' };
+                readonly id: { readonly column: 'id' };
+                readonly mediaType: { readonly column: 'mediaType' };
+                readonly posterPath: { readonly column: 'posterPath' };
+                readonly providerKeys: { readonly column: 'providerKeys' };
+                readonly providersRefreshedAt: { readonly column: 'providersRefreshedAt' };
+                readonly providersRegion: { readonly column: 'providersRegion' };
+                readonly title: { readonly column: 'title' };
+                readonly tmdbId: { readonly column: 'tmdbId' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly watched: { readonly column: 'watched' };
+                readonly year: { readonly column: 'year' };
+              };
+            };
+          };
+        };
+        readonly enum: {
+          readonly MediaType: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'tv'; readonly value: 'tv' },
+              { readonly name: 'movie'; readonly value: 'movie' },
+            ];
+          };
+          readonly PriceSource: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'catalog'; readonly value: 'catalog' },
+              { readonly name: 'manual'; readonly value: 'manual' },
+              { readonly name: 'invoice'; readonly value: 'invoice' },
+            ];
+          };
+          readonly ServiceStatus: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'active'; readonly value: 'active' },
+              { readonly name: 'paused'; readonly value: 'paused' },
+            ];
+          };
+        };
+        readonly enumMemberTypes?: {
+          readonly MediaType: readonly [
+            { readonly name: 'tv'; readonly value: 'tv' },
+            { readonly name: 'movie'; readonly value: 'movie' },
+          ];
+          readonly PriceSource: readonly [
+            { readonly name: 'catalog'; readonly value: 'catalog' },
+            { readonly name: 'manual'; readonly value: 'manual' },
+            { readonly name: 'invoice'; readonly value: 'invoice' },
+          ];
+          readonly ServiceStatus: readonly [
+            { readonly name: 'active'; readonly value: 'active' },
+            { readonly name: 'paused'; readonly value: 'paused' },
+          ];
         };
       };
     };
@@ -500,7 +1221,7 @@ type ContractBase = Omit<
             readonly params: { readonly precision: 3 };
           };
           readonly ref: {
-            readonly entry: 'Item';
+            readonly entry: 'Household';
             readonly field: 'createdAt';
             readonly namespace: 'public';
           };
@@ -517,7 +1238,77 @@ type ContractBase = Omit<
             readonly params: { readonly precision: 3 };
           };
           readonly ref: {
-            readonly entry: 'Item';
+            readonly entry: 'Household';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'HouseholdMember';
+            readonly field: 'joinedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Service';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Service';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'WatchlistShow';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'WatchlistShow';
             readonly field: 'updatedAt';
             readonly namespace: 'public';
           };

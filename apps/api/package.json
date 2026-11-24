@@ -9,7 +9,8 @@
     "dev": "dotenvx run -q -f ../../.env --ignore=MISSING_ENV_FILE -- node --watch --watch-preserve-output src/server.ts",
     "start": "node src/server.ts",
     "test": "dotenvx run -q -f ../../.env --ignore=MISSING_ENV_FILE -- vitest run",
-    "build": "node scripts/build-vercel.ts"
+    "build": "node scripts/build-vercel.ts",
+    "tmdb-stub": "node scripts/tmdb-stub.ts"
   },
   "dependencies": {
     "@app/db": "workspace:*",
