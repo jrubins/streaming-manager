@@ -7,7 +7,7 @@ terraform {
   # endpoint from AWS_ENDPOINT_URL_S3; credentials are an R2 API token in AWS_ACCESS_KEY_ID
   # and AWS_SECRET_ACCESS_KEY (see README.md). The key is fixed: changing it loses the state.
   backend "s3" {
-    key          = "CHANGE-ME/terraform.tfstate"
+    key          = "stream-rotation/terraform.tfstate"
     region       = "auto"
     use_lockfile = true
 
