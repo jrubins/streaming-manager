@@ -13,6 +13,8 @@ export const ProviderPlanSchema = z.object({
   uhd: z.boolean(),
   /** Downloads for offline viewing. */
   downloads: z.boolean(),
+  /** Set on a plan offered through a membership the household has (free or discounted). */
+  perk: z.object({ offerId: z.string(), via: z.string(), url: z.string() }).nullable().optional(),
 });
 export type ProviderPlan = z.infer<typeof ProviderPlanSchema>;
 

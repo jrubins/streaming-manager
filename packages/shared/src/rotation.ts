@@ -99,6 +99,9 @@ export interface OptimizerSubscription {
   planName: string | null;
   monthlyPriceCents: number | null;
   status: ServiceStatus;
+  /** A perk that applies now: it sets the price, and the plan stays as it is (switching
+   * plans would lose the perk). */
+  perk?: { monthlyPriceCents: number } | null;
 }
 
 export interface OptimizerShow {
@@ -195,6 +198,12 @@ export function optimizePlan<S extends OptimizerSubscription, W extends Optimize
   }
 
   const chosen = chooseCandidates(candidates, needs);
+  // An active subscription that costs nothing (a free perk) is kept: pausing it saves nothing.
+  candidates.forEach((candidate, index) => {
+    if (candidate.service?.status === 'active' && candidate.cost === 0 && !candidate.planChange) {
+      chosen.add(index);
+    }
+  });
 
   const entries: OptimizedEntry<S, W>[] = [];
   const listed = new Set<string>();
@@ -240,8 +249,9 @@ export function optimizePlan<S extends OptimizerSubscription, W extends Optimize
   const unpriced = new Set<string>();
   for (const service of input.subscriptions) {
     if (service.status !== 'active') continue;
-    if (service.monthlyPriceCents === null) unpriced.add(service.providerKey);
-    else currentCostCents += service.monthlyPriceCents;
+    const price = service.perk ? service.perk.monthlyPriceCents : service.monthlyPriceCents;
+    if (price === null) unpriced.add(service.providerKey);
+    else currentCostCents += price;
   }
   for (const index of chosen) {
     const candidate = candidates[index];
@@ -308,8 +318,11 @@ function toCandidate<S extends OptimizerSubscription>(
 
   // Its current plan, if it qualifies: published features with the household's own price. A
   // plan we know nothing about (custom, or no published plans) is assumed to qualify.
-  const currentQualifies = current ? planMeets(current, preferences) : true;
-  const currentCost = service.monthlyPriceCents ?? current?.monthlyPriceCents ?? null;
+  // A perk is kept whatever the preferences: the household already has it.
+  const currentQualifies = service.perk || !current ? true : planMeets(current, preferences);
+  const currentCost = service.perk
+    ? service.perk.monthlyPriceCents
+    : (service.monthlyPriceCents ?? current?.monthlyPriceCents ?? null);
   const stay: Candidate<S> | null = currentQualifies
     ? {
         ...base,
@@ -320,7 +333,7 @@ function toCandidate<S extends OptimizerSubscription>(
       }
     : null;
   const switchTo: Candidate<S> | null =
-    best && best.name !== service.planName
+    best && best.name !== service.planName && !service.perk
       ? {
           ...base,
           plan: best,

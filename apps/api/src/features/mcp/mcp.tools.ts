@@ -2,6 +2,8 @@ import {
   AddToWatchlistSchema,
   CatalogProviderSchema,
   CreateServiceSchema,
+  HouseholdMembershipsSchema,
+  OffersSchema,
   PreferencesSchema,
   RotationPlanSchema,
   ServiceIdParamsSchema,
@@ -83,6 +85,39 @@ export function createMcpServer(services: McpServices, userId: string): McpServe
       outputSchema: PreferencesSchema,
     },
     async (input) => result(await services.households.updatePreferences(userId, input)),
+  );
+
+  server.registerTool(
+    'list_offers',
+    {
+      title: 'List streaming perks',
+      description:
+        'Streaming services offered free or discounted with other memberships (internet, phone ' +
+        'plans, Walmart+, credit cards), and which memberships the household has. The plan ' +
+        'uses perks of memberships the household has.',
+      outputSchema: OffersSchema.extend({ householdMemberships: z.string().array() }),
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      const [offers, { memberships }] = await Promise.all([
+        services.catalog.offers(userId),
+        services.households.memberships(userId),
+      ]);
+      return result({ ...offers, householdMemberships: memberships });
+    },
+  );
+
+  server.registerTool(
+    'set_memberships',
+    {
+      title: 'Set memberships',
+      description:
+        'Replace the list of memberships the household has (keys from list_offers), so the plan ' +
+        'can use their streaming perks.',
+      inputSchema: HouseholdMembershipsSchema,
+      outputSchema: HouseholdMembershipsSchema,
+    },
+    async (input) => result(await services.households.setMemberships(userId, input)),
   );
 
   server.registerTool(

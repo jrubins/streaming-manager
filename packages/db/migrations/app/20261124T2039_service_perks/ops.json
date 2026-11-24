@@ -1,0 +1,299 @@
+[
+  {
+    "id": "column.public.Household.memberships",
+    "label": "Add column \"memberships\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "memberships",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"memberships\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "memberships"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"memberships\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"memberships\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"memberships\" text[] DEFAULT '{}' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"memberships\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "memberships"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"memberships\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"memberships\" has type \"text[]\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "memberships",
+          "text[]"
+        ]
+      },
+      {
+        "description": "verify column \"memberships\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "memberships",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Service.perkEndsOn",
+    "label": "Add column \"perkEndsOn\" to \"Service\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "perkEndsOn",
+        "table": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"perkEndsOn\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkEndsOn"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"perkEndsOn\" on \"Service\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"perkEndsOn\"",
+        "sql": "ALTER TABLE \"public\".\"Service\" ADD COLUMN \"perkEndsOn\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"perkEndsOn\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkEndsOn"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"perkEndsOn\" on \"Service\""
+        }
+      },
+      {
+        "description": "verify column \"perkEndsOn\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkEndsOn",
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Service.perkPriceCents",
+    "label": "Add column \"perkPriceCents\" to \"Service\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "perkPriceCents",
+        "table": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"perkPriceCents\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkPriceCents"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"perkPriceCents\" on \"Service\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"perkPriceCents\"",
+        "sql": "ALTER TABLE \"public\".\"Service\" ADD COLUMN \"perkPriceCents\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"perkPriceCents\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkPriceCents"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"perkPriceCents\" on \"Service\""
+        }
+      },
+      {
+        "description": "verify column \"perkPriceCents\" has type \"integer\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkPriceCents",
+          "integer"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Service.perkVia",
+    "label": "Add column \"perkVia\" to \"Service\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "perkVia",
+        "table": "Service"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"perkVia\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkVia"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"perkVia\" on \"Service\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"perkVia\"",
+        "sql": "ALTER TABLE \"public\".\"Service\" ADD COLUMN \"perkVia\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"perkVia\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkVia"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"perkVia\" on \"Service\""
+        }
+      },
+      {
+        "description": "verify column \"perkVia\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Service",
+          "perkVia",
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.Household.Household_memberships_elem_not_null_cee5b156",
+    "label": "Add check constraint \"Household_memberships_elem_not_null_cee5b156\" on \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "Household_memberships_elem_not_null_cee5b156",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Household_memberships_elem_not_null_cee5b156\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Household_memberships_elem_not_null_cee5b156",
+          "public",
+          "\"public\".\"Household\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Household_memberships_elem_not_null_cee5b156\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"Household_memberships_elem_not_null_cee5b156\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD CONSTRAINT \"Household_memberships_elem_not_null_cee5b156\" CHECK (array_position(\"memberships\", NULL) IS NULL)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify check constraint \"Household_memberships_elem_not_null_cee5b156\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4)) AS \"result\"",
+        "params": [
+          "Household_memberships_elem_not_null_cee5b156",
+          "public",
+          "\"public\".\"Household\"",
+          "c"
+        ]
+      }
+    ]
+  }
+]

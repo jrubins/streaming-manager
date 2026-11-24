@@ -294,3 +294,62 @@ describe('planAlternatives', () => {
     expect(planAlternatives(input, optimizePlan(input))).toEqual([]);
   });
 });
+
+describe('perks', () => {
+  const PEACOCK = offering('peacock', [
+    plan('Premium', 10.99, { ads: true }),
+    plan('Premium Plus', 16.99),
+  ]);
+
+  it('keeps a free perk at no cost, whatever the preferences, and never switches its plan', () => {
+    const peacock = {
+      ...sub('peacock', 'active', 'Premium', 1099),
+      perk: { monthlyPriceCents: 0 },
+    };
+    const result = optimizePlan({
+      subscriptions: [peacock],
+      offerings: [PEACOCK],
+      shows: [show(['peacock'])],
+      preferences: { ...DEFAULT_PREFERENCES, allowAds: false },
+    });
+    expect(result.entries).toEqual([
+      expect.objectContaining({ state: 'keep', planChange: false, plannedCostCents: 0 }),
+    ]);
+    expect(result.currentCostCents).toBe(0);
+    expect(result.plannedCostCents).toBe(0);
+  });
+
+  it('keeps a free perk even when nothing on the list needs it', () => {
+    const peacock = {
+      ...sub('peacock', 'active', 'Premium', 1099),
+      perk: { monthlyPriceCents: 0 },
+    };
+    const result = optimizePlan({
+      subscriptions: [peacock],
+      offerings: [PEACOCK],
+      shows: [],
+      preferences: DEFAULT_PREFERENCES,
+    });
+    expect(result.entries[0]?.state).toBe('keep');
+  });
+
+  it('switches a paid service to a membership perk plan when that is cheaper', () => {
+    const perkPlan = {
+      ...plan('Premium (Walmart+)', 0, { ads: true }),
+      perk: { offerId: 'walmart-peacock', via: 'Walmart+', url: 'https://example.com' },
+    };
+    const withPerk = { ...PEACOCK, plans: [...PEACOCK.plans, perkPlan] };
+    const result = optimizePlan({
+      subscriptions: [sub('peacock', 'active', 'Premium', 1099)],
+      offerings: [withPerk],
+      shows: [show(['peacock'])],
+      preferences: DEFAULT_PREFERENCES,
+    });
+    expect(result.entries[0]).toMatchObject({
+      state: 'keep',
+      planChange: true,
+      plan: { name: 'Premium (Walmart+)' },
+      plannedCostCents: 0,
+    });
+  });
+});

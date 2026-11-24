@@ -3,6 +3,7 @@ export * from './auth.ts';
 export * from './catalog.ts';
 export * from './health.ts';
 export * from './household.ts';
+export * from './perks.ts';
 export * from './preferences.ts';
 export * from './rotation.ts';
 export * from './services.ts';

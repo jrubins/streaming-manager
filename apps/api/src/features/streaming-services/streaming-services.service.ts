@@ -1,5 +1,5 @@
 import type { Db } from '@app/db';
-import type { CreateService, PriceSource, Service, UpdateService } from '@app/shared';
+import type { CreateService, PriceSource, Service, ServicePerk, UpdateService } from '@app/shared';
 import { isUniqueViolation } from '../../lib/db-errors.ts';
 import { HttpError, notFound } from '../../lib/http-error.ts';
 import type { CatalogService } from '../catalog/catalog.service.ts';
@@ -17,8 +17,22 @@ interface ServiceRow {
   monthlyPriceCents: number | null;
   priceSource: PriceSource | null;
   status: 'active' | 'paused';
+  perkVia: string | null;
+  perkPriceCents: number | null;
+  perkEndsOn: string | null;
   createdAt: Date;
 }
+
+const perkOf = (row: ServiceRow): ServicePerk | null =>
+  row.perkVia === null
+    ? null
+    : { via: row.perkVia, monthlyPriceCents: row.perkPriceCents ?? 0, endsOn: row.perkEndsOn };
+
+const perkColumns = (perk: ServicePerk | null) => ({
+  perkVia: perk?.via ?? null,
+  perkPriceCents: perk?.monthlyPriceCents ?? null,
+  perkEndsOn: perk?.endsOn ?? null,
+});
 
 /** The household's streaming subscriptions and their prices. */
 export function createStreamingServicesService(
@@ -39,6 +53,7 @@ export function createStreamingServicesService(
     monthlyPriceCents: row.monthlyPriceCents,
     priceSource: row.priceSource,
     status: row.status,
+    perk: perkOf(row),
     manageUrl: bundleByKey(row.providerKey)?.manageUrl ?? manageUrl(row.providerKey),
     createdAt: row.createdAt.toISOString(),
   });
@@ -86,6 +101,7 @@ export function createStreamingServicesService(
             : (plan?.monthlyPriceCents ?? null),
           priceSource: typed ? 'manual' : plan ? 'catalog' : null,
           status: input.status ?? 'active',
+          ...perkColumns(input.perk ?? null),
         });
         return toService(row);
       } catch (error) {
@@ -106,6 +122,7 @@ export function createStreamingServicesService(
 
       const changes: Partial<Omit<ServiceRow, 'id' | 'createdAt'>> = {};
       if (input.status !== undefined) changes.status = input.status;
+      if (input.perk !== undefined) Object.assign(changes, perkColumns(input.perk));
       if (input.planName !== undefined) changes.planName = input.planName;
       if (input.monthlyPriceCents !== undefined) {
         changes.monthlyPriceCents = input.monthlyPriceCents;
