@@ -18,6 +18,7 @@ export const MEMBERSHIPS: readonly Membership[] = [
   { key: 'dashpass', name: 'DoorDash DashPass', category: 'shopping' },
   { key: 'amazon-prime', name: 'Amazon Prime', category: 'shopping' },
   { key: 'amex-platinum', name: 'Amex Platinum', category: 'card' },
+  { key: 'chase-sapphire-preferred', name: 'Chase Sapphire Preferred', category: 'card' },
   { key: 'chase-sapphire-reserve', name: 'Chase Sapphire Reserve', category: 'card' },
 ];
 
@@ -30,7 +31,9 @@ const OFFERS: readonly OfferDef[] = [
     providerKey: 'peacock',
     planName: 'Premium',
     monthlyPriceCents: 0,
-    summary: 'Peacock Premium is included with many Xfinity Internet and TV plans.',
+    summary:
+      'Peacock Premium is free for up to 2 years with Xfinity Gigabit Internet or faster. ' +
+      'StreamSaver (Netflix, Apple TV and Peacock, with ads) is a separate add-on.',
     url: 'https://www.xfinity.com/learn/digital-cable-tv/peacock',
   },
   {
@@ -75,7 +78,9 @@ const OFFERS: readonly OfferDef[] = [
     providerKey: 'netflix',
     planName: 'Standard with ads',
     monthlyPriceCents: 0,
-    summary: 'Netflix Standard with ads is included with Experience More, Beyond and Go5G Plus.',
+    summary:
+      'Netflix Standard with ads is included with many higher-tier unlimited plans. Check ' +
+      'your plan.',
     url: 'https://www.t-mobile.com/tv-streaming/netflix-on-us',
   },
   {
@@ -110,8 +115,8 @@ const OFFERS: readonly OfferDef[] = [
     membershipKey: 'verizon',
     providerKey: 'hbo-max',
     planName: 'Basic with ads',
-    monthlyPriceCents: 1000,
-    summary: 'A myPlan perk: Netflix and HBO Max with ads together for $10 a month.',
+    monthlyPriceCents: 1300,
+    summary: 'A myPlan perk: Netflix and HBO Max with ads together for $13 a month.',
     url: 'https://www.verizon.com/plans/perks/',
   },
   {
@@ -120,7 +125,9 @@ const OFFERS: readonly OfferDef[] = [
     providerKey: 'paramount-plus',
     planName: 'Essential',
     monthlyPriceCents: 0,
-    summary: 'Walmart+ includes Paramount+ Essential, or Peacock Premium instead.',
+    summary:
+      'Walmart+ includes Paramount+ Essential or Peacock Premium (your choice, switchable ' +
+      'every 90 days).',
     url: 'https://www.walmart.com/plus/benefits',
   },
   {
@@ -129,7 +136,9 @@ const OFFERS: readonly OfferDef[] = [
     providerKey: 'peacock',
     planName: 'Premium',
     monthlyPriceCents: 0,
-    summary: 'Walmart+ includes Peacock Premium, or Paramount+ Essential instead.',
+    summary:
+      'Walmart+ includes Peacock Premium or Paramount+ Essential (your choice, switchable ' +
+      'every 90 days).',
     url: 'https://www.walmart.com/plus/benefits',
   },
   {
@@ -138,7 +147,7 @@ const OFFERS: readonly OfferDef[] = [
     providerKey: 'peacock',
     planName: 'Premium',
     monthlyPriceCents: 0,
-    summary: 'Instacart+ includes Peacock Premium.',
+    summary: 'Instacart+ includes Peacock Premium for members not already subscribed to Peacock.',
     url: 'https://www.instacart.com/instacart-plus',
   },
   {
@@ -147,7 +156,7 @@ const OFFERS: readonly OfferDef[] = [
     providerKey: 'hbo-max',
     planName: 'Basic with ads',
     monthlyPriceCents: 0,
-    summary: 'DashPass includes HBO Max Basic with ads.',
+    summary: 'Annual DashPass includes HBO Max Basic with ads.',
     url: 'https://www.doordash.com/dashpass/',
   },
   {
@@ -178,12 +187,25 @@ const OFFERS: readonly OfferDef[] = [
     url: 'https://www.americanexpress.com/us/credit-cards/card/platinum/',
   },
   {
+    id: 'chase-sapphire-preferred-apple-tv',
+    membershipKey: 'chase-sapphire-preferred',
+    providerKey: 'apple-tv-plus',
+    planName: 'Monthly',
+    monthlyPriceCents: 0,
+    summary:
+      'A free year of Apple TV when activated by Dec 31, 2026 (or $7.50/mo off Apple One). ' +
+      'Set the end date on the service.',
+    url: 'https://media.chase.com/news/Meet-the-New-Chase-Sapphire-Preferred',
+  },
+  {
     id: 'chase-sapphire-reserve-apple-tv',
     membershipKey: 'chase-sapphire-reserve',
     providerKey: 'apple-tv-plus',
     planName: 'Monthly',
     monthlyPriceCents: 0,
-    summary: 'Sapphire Reserve cardholders get Apple TV (and Apple Music) at no cost.',
+    summary:
+      'Sapphire Reserve cardholders get Apple TV and Apple Music at no cost (or $15/mo off ' +
+      'Apple One).',
     url: 'https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve',
   },
 ];
