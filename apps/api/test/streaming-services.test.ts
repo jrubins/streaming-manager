@@ -66,6 +66,18 @@ describe('bundles', () => {
     expect(bundle?.plans.map((p) => p.monthlyPriceCents)).toEqual([2199, 3299]);
   });
 
+  it('offers the Disney+ and Hulu bundle without ESPN', async () => {
+    const auth = await asNewUser();
+    expect(
+      await addService(auth, { providerKey: 'disney-hulu', planName: 'Premium' }),
+    ).toMatchObject({
+      name: 'Disney+ & Hulu',
+      includes: ['disney-plus', 'hulu'],
+      planName: 'Premium',
+      monthlyPriceCents: 2699,
+    });
+  });
+
   it('adds a bundle as one subscription that includes its services', async () => {
     const auth = await asNewUser();
     expect(await addService(auth, { providerKey: 'disney-hulu-espn-select' })).toMatchObject({
