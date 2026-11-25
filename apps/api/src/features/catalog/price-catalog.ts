@@ -57,7 +57,11 @@ const US_PLANS: Readonly<Record<string, readonly ProviderPlan[]>> = {
     plan('Individual', 15.99, { ads: false, streams: 1, uhd: true, downloads: true }),
     plan('Family', 26.99, { ads: false, streams: 6, uhd: true, downloads: true }),
   ],
-  'youtube-tv': [plan('Base plan', 82.99, { ads: true, streams: 3, uhd: false, downloads: false })],
+  'youtube-tv': [
+    plan('Base plan', 82.99, { ads: true, streams: 3, uhd: false, downloads: false }),
+    // The 4K Plus add-on ($9.99): 4K, unlimited streams at home, offline DVR downloads.
+    plan('Base plan + 4K Plus', 92.98, { ads: true, streams: 3, uhd: true, downloads: true }),
+  ],
   starz: [plan('Monthly', 11.99, { ads: false, streams: 4, uhd: true, downloads: true })],
   crunchyroll: [
     plan('Fan', 9.99, { ads: false, streams: 1, uhd: false, downloads: false }),
