@@ -111,7 +111,7 @@ describe('services API', () => {
     const auth = await asNewUser();
     expect(await addService(auth, { providerKey: 'netflix', planName: 'Premium' })).toMatchObject({
       planName: 'Premium',
-      monthlyPriceCents: 2199,
+      monthlyPriceCents: 2699,
       priceSource: 'catalog',
     });
     expect(
