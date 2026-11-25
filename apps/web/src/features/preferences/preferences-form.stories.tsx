@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const ads = canvas.getByRole('group', { name: 'Ads' });
+    const ads = canvas.getByRole('group', { name: 'Ad-supported plans' });
     await expect(within(ads).getByRole('button', { name: 'Ads are fine' })).toHaveAttribute(
       'aria-pressed',
       'true',
