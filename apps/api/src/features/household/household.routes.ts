@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  HouseholdChannelsSchema,
   HouseholdMembershipsSchema,
   JoinHouseholdSchema,
   UpdateHouseholdSchema,
@@ -34,6 +35,15 @@ export function householdRouter(households: HouseholdService, watchlist: Watchli
   router.patch('/preferences', async (req, res) => {
     const input = validate(UpdatePreferencesSchema, req.body);
     res.json(await households.updatePreferences(currentUserId(req), input));
+  });
+
+  router.get('/channels', async (req, res) => {
+    res.json(await households.channels(currentUserId(req)));
+  });
+
+  router.put('/channels', async (req, res) => {
+    const input = validate(HouseholdChannelsSchema, req.body);
+    res.json(await households.setChannels(currentUserId(req), input));
   });
 
   router.get('/memberships', async (req, res) => {

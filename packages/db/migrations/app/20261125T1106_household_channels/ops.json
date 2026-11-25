@@ -1,0 +1,119 @@
+[
+  {
+    "id": "column.public.Household.channels",
+    "label": "Add column \"channels\" to \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "channels",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"channels\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "channels"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"channels\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"channels\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD COLUMN \"channels\" text[] DEFAULT '{}' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"channels\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "channels"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"channels\" on \"Household\""
+        }
+      },
+      {
+        "description": "verify column \"channels\" has type \"text[]\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "channels",
+          "text[]"
+        ]
+      },
+      {
+        "description": "verify column \"channels\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Household",
+          "channels",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.Household.Household_channels_elem_not_null_6ac6295a",
+    "label": "Add check constraint \"Household_channels_elem_not_null_6ac6295a\" on \"Household\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "Household_channels_elem_not_null_6ac6295a",
+        "table": "Household"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Household_channels_elem_not_null_6ac6295a\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Household_channels_elem_not_null_6ac6295a",
+          "public",
+          "\"public\".\"Household\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Household_channels_elem_not_null_6ac6295a\" on \"Household\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"Household_channels_elem_not_null_6ac6295a\"",
+        "sql": "ALTER TABLE \"public\".\"Household\" ADD CONSTRAINT \"Household_channels_elem_not_null_6ac6295a\" CHECK (array_position(\"channels\", NULL) IS NULL)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify check constraint \"Household_channels_elem_not_null_6ac6295a\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4)) AS \"result\"",
+        "params": [
+          "Household_channels_elem_not_null_6ac6295a",
+          "public",
+          "\"public\".\"Household\"",
+          "c"
+        ]
+      }
+    ]
+  }
+]

@@ -48,6 +48,8 @@ export const RotationEntrySchema = z.object({
   plannedCostCents: z.number().int().nullable(),
   /** Unwatched titles that stream on it (whether or not it is in the plan). */
   shows: WatchlistShowSchema.array(),
+  /** Needed live channels and league passes it carries (names). */
+  channels: z.string().array(),
 });
 export type RotationEntry = z.infer<typeof RotationEntrySchema>;
 
@@ -72,6 +74,8 @@ export const RotationPlanSchema = z.object({
   entries: RotationEntrySchema.array(),
   /** Unwatched titles no plan meeting the preferences can cover. */
   uncovered: WatchlistShowSchema.array(),
+  /** Needed channels no service in the region carries (names). */
+  uncoveredChannels: z.string().array(),
   /** What the active subscriptions cost now, per month. */
   currentCostCents: z.number().int(),
   /** What the plan costs per month. */

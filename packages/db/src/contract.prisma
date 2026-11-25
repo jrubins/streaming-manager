@@ -38,6 +38,8 @@ model Household {
   suggestNewServices Boolean    @default(true)
   // Keys of memberships with streaming perks (an internet provider, a phone plan, Walmart+).
   memberships        String[]   @default([])
+  // Keys of the live channels and league passes the household needs.
+  channels           String[]   @default([])
   createdAt  DateTime           @default(now()) @onCreate(now())
   updatedAt  temporal.UpdatedAt
   members    HouseholdMember[]

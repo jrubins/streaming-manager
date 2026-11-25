@@ -1,5 +1,6 @@
 import type {
   CatalogProvider,
+  ChannelCatalog,
   OfferingKind,
   Offers,
   ProviderPlan,
@@ -7,6 +8,7 @@ import type {
   TitleSearchResult,
 } from '@app/shared';
 import type { HouseholdService } from '../household/household.service.ts';
+import { CHANNEL_LOOKUPS, CHANNELS_AS_OF, channelsFor } from './channel-catalog.ts';
 import { manageUrl } from './manage-links.ts';
 import { offersFor, PERKS_AS_OF } from './perk-catalog.ts';
 import { bundleByKey, bundlesFor, plansFor, PRICES_AS_OF } from './price-catalog.ts';
@@ -42,18 +44,28 @@ export function createCatalogService(tmdb: TmdbClient, households: HouseholdServ
       manageUrl: manageUrl(provider.key),
     }));
     const available = new Set(services.map((service) => service.key));
-    const bundles: Offering[] = bundlesFor(region)
-      .filter((bundle) => bundle.includes.every((key) => available.has(key)))
+    const definitions = bundlesFor(region);
+    // A standalone offering replaces TMDB's entry of the same key (keeping its logo), and
+    // Sling's packages replace TMDB's single "Sling TV".
+    const replaced = new Set([
+      'sling-tv',
+      ...definitions.filter((d) => d.standalone).map((d) => d.key),
+    ]);
+    const logoOf = (key: string) => services.find((s) => s.key === key)?.logoPath ?? null;
+    const bundles: Offering[] = definitions
+      .filter((bundle) => bundle.standalone || bundle.includes.every((key) => available.has(key)))
       .map((bundle) => ({
         key: bundle.key,
         name: bundle.name,
-        kind: 'bundle',
+        kind: bundle.kind ?? 'bundle',
         includes: [...bundle.includes],
-        logoPath: services.find((s) => s.key === bundle.includes[0])?.logoPath ?? null,
+        logoPath:
+          [bundle.key, ...bundle.includes].map(logoOf).find((path) => path !== null) ?? null,
         plans: [...plansFor(region, bundle.key)],
         manageUrl: bundle.manageUrl,
       }));
-    const all = [...services, ...bundles];
+    const kept = services.filter((service) => !replaced.has(service.key));
+    const all = [...kept, ...bundles];
     return [
       ...all.filter((offering) => offering.plans.length > 0),
       ...all.filter((offering) => offering.plans.length === 0),
@@ -77,6 +89,16 @@ export function createCatalogService(tmdb: TmdbClient, households: HouseholdServ
 
     async providers(userId: string): Promise<CatalogProvider[]> {
       return (await offerings(userId)).map(toCatalogProvider);
+    },
+
+    /** Live channels and league passes, with the services that carry each. */
+    async channels(userId: string): Promise<ChannelCatalog> {
+      const { region } = await households.context(userId);
+      return {
+        channels: [...channelsFor(region)],
+        lookups: region === 'US' ? CHANNEL_LOOKUPS : [],
+        asOf: CHANNELS_AS_OF,
+      };
     },
 
     /** Streaming perks of other memberships in the household's region. */

@@ -79,6 +79,16 @@
                   "kind": "scalar"
                 }
               },
+              "channels": {
+                "many": {
+                  "elementNullable": false
+                },
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -217,6 +227,9 @@
               "fields": {
                 "allowAds": {
                   "column": "allowAds"
+                },
+                "channels": {
+                  "column": "channels"
                 },
                 "createdAt": {
                   "column": "createdAt"
@@ -711,6 +724,11 @@
             "Household": {
               "checks": [
                 {
+                  "expression": "array_position(\"channels\", NULL) IS NULL",
+                  "name": "Household_channels_elem_not_null_6ac6295a",
+                  "prefix": "Household_channels_elem_not_null"
+                },
+                {
                   "expression": "array_position(\"memberships\", NULL) IS NULL",
                   "name": "Household_memberships_elem_not_null_cee5b156",
                   "prefix": "Household_memberships_elem_not_null"
@@ -723,6 +741,18 @@
                   "default": {
                     "kind": "literal",
                     "value": true
+                  },
+                  "nullable": false
+                },
+                "channels": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "default": {
+                    "kind": "literal",
+                    "value": []
+                  },
+                  "many": {
+                    "elementNullable": false
                   },
                   "nullable": false
                 },
@@ -1274,7 +1304,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b3e22bcbaa098c4f05202bb2583419559af3b41070844c8f674186b1c61dbd2b"
+    "storageHash": "466da3a433a5c3bad1dbd6d48c66c132f63d186f8d7ded134f88c5d71fe9924e"
   },
   "execution": {
     "executionHash": "c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606",

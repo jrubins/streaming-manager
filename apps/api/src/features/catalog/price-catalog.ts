@@ -57,11 +57,6 @@ const US_PLANS: Readonly<Record<string, readonly ProviderPlan[]>> = {
     plan('Individual', 15.99, { ads: false, streams: 1, uhd: true, downloads: true }),
     plan('Family', 26.99, { ads: false, streams: 6, uhd: true, downloads: true }),
   ],
-  'youtube-tv': [
-    plan('Base plan', 82.99, { ads: true, streams: 3, uhd: false, downloads: false }),
-    // The 4K Plus add-on ($9.99): 4K, unlimited streams at home, offline DVR downloads.
-    plan('Base plan + 4K Plus', 92.98, { ads: true, streams: 3, uhd: true, downloads: true }),
-  ],
   starz: [plan('Monthly', 11.99, { ads: false, streams: 4, uhd: true, downloads: true })],
   crunchyroll: [
     plan('Fan', 9.99, { ads: false, streams: 1, uhd: false, downloads: false }),
@@ -73,12 +68,6 @@ const US_PLANS: Readonly<Record<string, readonly ProviderPlan[]>> = {
     plan('Premium', 10.99, { ads: false, streams: 4, uhd: true, downloads: true }),
   ],
   'espn-plus': [plan('Select', 13.99, { ads: true, streams: 3, uhd: false, downloads: false })],
-  'sling-tv': [
-    plan('Orange', 45.99, { ads: true, streams: 1, uhd: false, downloads: false }),
-    plan('Blue', 45.99, { ads: true, streams: 3, uhd: false, downloads: false }),
-    plan('Orange & Blue', 60.99, { ads: true, streams: 4, uhd: false, downloads: false }),
-  ],
-  philo: [plan('Philo', 33, { ads: true, streams: 3, uhd: false, downloads: false })],
 };
 
 export interface BundleDefinition {
@@ -89,6 +78,11 @@ export interface BundleDefinition {
   plans: readonly ProviderPlan[];
   /** Where it is managed (paused, cancelled), when known. */
   manageUrl: string | null;
+  /** A single service rather than a bundle (default: bundle). */
+  kind?: 'service' | 'bundle';
+  /** Offered in the region whether or not TMDB lists it: live TV packages and league passes,
+   * which TMDB doesn't track. Their `includes` may name keys TMDB doesn't know. */
+  standalone?: boolean;
 }
 
 /**
@@ -96,6 +90,117 @@ export interface BundleDefinition {
  * downloads are what every one of its services allows (the weakest).
  */
 const US_BUNDLES: readonly BundleDefinition[] = [
+  // Live TV. Chosen by their channels (see channel-catalog.ts) more than by titles.
+  {
+    key: 'youtube-tv',
+    name: 'YouTube TV',
+    kind: 'service',
+    standalone: true,
+    includes: ['youtube-tv'],
+    plans: [
+      plan('Base plan', 82.99, { ads: true, streams: 3, uhd: false, downloads: false }),
+      // The 4K Plus add-on ($9.99): 4K, unlimited streams at home, offline DVR downloads.
+      plan('Base plan + 4K Plus', 92.98, { ads: true, streams: 3, uhd: true, downloads: true }),
+    ],
+    manageUrl: 'https://tv.youtube.com/settings/membership',
+  },
+  {
+    key: 'hulu-live-tv',
+    name: 'Hulu + Live TV',
+    standalone: true,
+    // Includes Disney+ and ESPN Select, so it covers their titles too.
+    includes: ['hulu-live-tv', 'hulu', 'disney-plus', 'espn-plus'],
+    plans: [
+      plan('With ads', 99.99, { ads: true, streams: 2, uhd: false, downloads: false }),
+      plan('No ads (on demand)', 109.99, { ads: false, streams: 2, uhd: false, downloads: true }),
+    ],
+    manageUrl: 'https://secure.hulu.com/account',
+  },
+  {
+    key: 'sling-orange',
+    name: 'Sling Orange',
+    kind: 'service',
+    standalone: true,
+    includes: ['sling-orange', 'sling-tv'],
+    plans: [plan('Orange', 45.99, { ads: true, streams: 1, uhd: false, downloads: false })],
+    manageUrl: 'https://www.sling.com/account',
+  },
+  {
+    key: 'sling-blue',
+    name: 'Sling Blue',
+    kind: 'service',
+    standalone: true,
+    includes: ['sling-blue', 'sling-tv'],
+    plans: [plan('Blue', 45.99, { ads: true, streams: 3, uhd: false, downloads: false })],
+    manageUrl: 'https://www.sling.com/account',
+  },
+  {
+    key: 'sling-orange-blue',
+    name: 'Sling Orange & Blue',
+    standalone: true,
+    includes: ['sling-orange', 'sling-blue', 'sling-tv'],
+    plans: [plan('Orange & Blue', 60.99, { ads: true, streams: 4, uhd: false, downloads: false })],
+    manageUrl: 'https://www.sling.com/account',
+  },
+  {
+    key: 'fubotv',
+    name: 'Fubo',
+    kind: 'service',
+    standalone: true,
+    includes: ['fubotv'],
+    plans: [plan('Pro', 88.99, { ads: true, streams: 10, uhd: true, downloads: false })],
+    manageUrl: 'https://www.fubo.tv/account',
+  },
+  {
+    key: 'directv-stream',
+    name: 'DirecTV Stream',
+    kind: 'service',
+    standalone: true,
+    includes: ['directv-stream'],
+    plans: [plan('Entertainment', 94.99, { ads: true, streams: 20, uhd: false, downloads: false })],
+    manageUrl: 'https://www.directv.com/stream',
+  },
+  {
+    key: 'philo',
+    name: 'Philo',
+    kind: 'service',
+    standalone: true,
+    includes: ['philo'],
+    plans: [plan('Philo', 33, { ads: true, streams: 3, uhd: false, downloads: false })],
+    manageUrl: 'https://www.philo.com/account',
+  },
+  // League passes: out-of-market games.
+  {
+    key: 'nfl-sunday-ticket',
+    name: 'NFL Sunday Ticket',
+    kind: 'service',
+    standalone: true,
+    includes: ['nfl-sunday-ticket'],
+    // Sold by the season ($480 on YouTube, $378 with YouTube TV): spread over its 5 months.
+    plans: [plan('Season, per month', 96, { ads: true, streams: 2, uhd: true, downloads: false })],
+    manageUrl: 'https://tv.youtube.com/nfl',
+  },
+  {
+    key: 'nba-league-pass',
+    name: 'NBA League Pass',
+    kind: 'service',
+    standalone: true,
+    includes: ['nba-league-pass'],
+    plans: [
+      plan('Standard', 16.99, { ads: true, streams: 1, uhd: false, downloads: false }),
+      plan('Premium', 24.99, { ads: false, streams: 3, uhd: false, downloads: true }),
+    ],
+    manageUrl: 'https://www.nba.com/watch/league-pass-stream',
+  },
+  {
+    key: 'mlb-tv',
+    name: 'MLB.TV',
+    kind: 'service',
+    standalone: true,
+    includes: ['mlb-tv'],
+    plans: [plan('Monthly', 29.99, { ads: true, streams: 1, uhd: false, downloads: false })],
+    manageUrl: 'https://www.mlb.com/live-stream-games/subscribe',
+  },
   {
     key: 'disney-hulu',
     name: 'Disney+ & Hulu',

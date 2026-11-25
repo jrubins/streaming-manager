@@ -8,10 +8,12 @@ import {
   type OptimizerOffering,
   type PerkOffer,
   type ProviderPlan,
+  type WatchlistShow,
   type RotationPlan,
 } from '@app/shared';
 import { HttpError } from '../../lib/http-error.ts';
 import type { CatalogService } from '../catalog/catalog.service.ts';
+import { channelsFor } from '../catalog/channel-catalog.ts';
 import { offersFor } from '../catalog/perk-catalog.ts';
 import type { HouseholdService } from '../household/household.service.ts';
 import type { StreamingServicesService } from '../streaming-services/streaming-services.service.ts';
@@ -43,15 +45,23 @@ export function createRotationService(
   return {
     async plan(userId: string): Promise<RotationPlan> {
       await watchlist.refreshStale(userId);
-      const [{ region }, preferences, serviceList, shows, available, { memberships }] =
-        await Promise.all([
-          households.context(userId),
-          households.preferences(userId),
-          services.list(userId),
-          watchlist.list(userId),
-          regionCatalog(userId),
-          households.memberships(userId),
-        ]);
+      const [
+        { region },
+        preferences,
+        serviceList,
+        shows,
+        available,
+        { memberships },
+        { channels },
+      ] = await Promise.all([
+        households.context(userId),
+        households.preferences(userId),
+        services.list(userId),
+        watchlist.list(userId),
+        regionCatalog(userId),
+        households.memberships(userId),
+        households.channels(userId),
+      ]);
 
       // A perk past its last day no longer applies: the service costs its regular price.
       const today = isoToday();
@@ -71,12 +81,47 @@ export function createRotationService(
         }
       }
 
-      const input = { subscriptions, offerings, shows, preferences };
+      // Each needed channel counts like a title: covered by any service that carries it.
+      const wanted = new Set(channels);
+      const channelNeeds: ChannelNeed[] = channelsFor(region)
+        .filter((channel) => wanted.has(channel.key))
+        .map((channel, index) => ({
+          id: -(index + 1),
+          providerKeys: channel.carriers,
+          watched: false,
+          channelName: channel.name,
+        }));
+
+      const input = { subscriptions, offerings, shows: [...shows, ...channelNeeds], preferences };
       const plan = optimizePlan(input);
-      return { preferences, ...plan, alternatives: planAlternatives(input, plan) };
+      const titlesOf = (needs: readonly Need[]) => needs.flatMap((n) => (isChannel(n) ? [] : [n]));
+      const channelsOf = (needs: readonly Need[]) =>
+        needs.flatMap((n) => (isChannel(n) ? [n.channelName] : []));
+      return {
+        preferences,
+        ...plan,
+        entries: plan.entries.map((entry) => ({
+          ...entry,
+          shows: titlesOf(entry.shows),
+          channels: channelsOf(entry.shows),
+        })),
+        uncovered: titlesOf(plan.uncovered),
+        uncoveredChannels: channelsOf(plan.uncovered),
+        alternatives: planAlternatives(input, plan),
+      };
     },
   };
 }
+
+/** A needed channel, in the shape of a watchlist title for the optimizer. */
+interface ChannelNeed {
+  id: number;
+  providerKeys: readonly string[];
+  watched: false;
+  channelName: string;
+}
+type Need = WatchlistShow | ChannelNeed;
+const isChannel = (need: Need): need is ChannelNeed => 'channelName' in need;
 
 /**
  * Each offering, with an extra plan for every perk of a membership the household has: the
