@@ -52,6 +52,29 @@ const US_PLANS: Readonly<Record<string, readonly ProviderPlan[]>> = {
     plan('Prime Video ad-free', 13.98, { ads: false, streams: 5, uhd: true, downloads: true }),
   ],
   'apple-tv-plus': [plan('Monthly', 14.99, { ads: false, streams: 6, uhd: true, downloads: true })],
+  // YouTube Premium (TMDB's "YouTube Premium" normalizes to `youtube`).
+  youtube: [
+    plan('Individual', 15.99, { ads: false, streams: 1, uhd: true, downloads: true }),
+    plan('Family', 26.99, { ads: false, streams: 6, uhd: true, downloads: true }),
+  ],
+  'youtube-tv': [plan('Base plan', 82.99, { ads: true, streams: 3, uhd: false, downloads: false })],
+  starz: [plan('Monthly', 11.99, { ads: false, streams: 4, uhd: true, downloads: true })],
+  crunchyroll: [
+    plan('Fan', 9.99, { ads: false, streams: 1, uhd: false, downloads: false }),
+    plan('Mega Fan', 13.99, { ads: false, streams: 4, uhd: false, downloads: true }),
+  ],
+  'mgm-plus': [plan('Monthly', 7.99, { ads: false, streams: 4, uhd: false, downloads: true })],
+  'amc-plus': [
+    plan('With ads', 7.99, { ads: true, streams: 4, uhd: false, downloads: false }),
+    plan('Premium', 10.99, { ads: false, streams: 4, uhd: true, downloads: true }),
+  ],
+  'espn-plus': [plan('Select', 13.99, { ads: true, streams: 3, uhd: false, downloads: false })],
+  'sling-tv': [
+    plan('Orange', 45.99, { ads: true, streams: 1, uhd: false, downloads: false }),
+    plan('Blue', 45.99, { ads: true, streams: 3, uhd: false, downloads: false }),
+    plan('Orange & Blue', 60.99, { ads: true, streams: 4, uhd: false, downloads: false }),
+  ],
+  philo: [plan('Philo', 33, { ads: true, streams: 3, uhd: false, downloads: false })],
 };
 
 export interface BundleDefinition {

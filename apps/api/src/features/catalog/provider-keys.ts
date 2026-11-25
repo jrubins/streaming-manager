@@ -43,6 +43,8 @@ const DISPLAY_NAMES: Readonly<Record<string, string>> = {
   'espn-plus': 'ESPN Select',
   'hbo-max': 'HBO Max',
   'mgm-plus': 'MGM+',
+  youtube: 'YouTube Premium',
+  'youtube-tv': 'YouTube TV',
   'amc-plus': 'AMC+',
   'paramount-plus': 'Paramount+',
   peacock: 'Peacock',

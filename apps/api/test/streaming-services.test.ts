@@ -124,13 +124,22 @@ describe('services API', () => {
       status: 'paused',
       monthlyPriceCents: 799,
       priceSource: 'manual',
-      planName: null,
+      planName: 'Fan',
+    });
+  });
+
+  it('prices common services beyond the big streamers', async () => {
+    const auth = await asNewUser();
+    expect(await addService(auth, { providerKey: 'starz' })).toMatchObject({
+      planName: 'Monthly',
+      monthlyPriceCents: 1199,
+      priceSource: 'catalog',
     });
   });
 
   it('adds a service without known prices unpriced', async () => {
     const auth = await asNewUser();
-    expect(await addService(auth, { providerKey: 'starz' })).toMatchObject({
+    expect(await addService(auth, { providerKey: 'tubi-tv' })).toMatchObject({
       monthlyPriceCents: null,
       priceSource: null,
       manageUrl: null,
