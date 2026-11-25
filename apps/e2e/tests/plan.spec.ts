@@ -24,7 +24,7 @@ async function seedHousehold(api: APIRequestContext) {
   await show(1010, 'tv'); // Netflix or Hulu
   await show(1004, 'movie'); // Netflix or Peacock
   await show(1002, 'tv'); // HBO Max
-  await show(1006, 'movie'); // Starz: not a service of theirs
+  await show(1006, 'movie'); // BritBox: unpriced, and not a service of theirs
   await show(1008, 'movie'); // rent only
   const watched = await show(1005, 'tv'); // Apple TV+, already watched
   await api.patch(`/watchlist/${watched.id}`, { data: { watched: true } });
@@ -60,7 +60,7 @@ test.describe('plan page', () => {
     await expect(row('Peacock').getByText('Its title is also on Netflix')).toBeVisible();
     await expect(row('Disney+')).toBeVisible();
     const notCovered = page.getByRole('region', { name: 'Not covered' });
-    await expect(notCovered.getByText('Streams on Starz')).toBeVisible();
+    await expect(notCovered.getByText('Streams on BritBox')).toBeVisible();
     await page.waitForLoadState('networkidle');
     await capture('plan');
 

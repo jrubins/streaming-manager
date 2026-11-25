@@ -50,7 +50,7 @@ describe('rotation plan', () => {
       .set('Authorization', auth)
       .send({ watched: true })
       .expect(200);
-    // Only on Starz, which has no known prices: nothing to suggest.
+    // Only on BritBox, which has no known prices: nothing to suggest.
     const lonely = WatchlistShowSchema.parse(
       await post(auth, '/watchlist', { tmdbId: 1006, mediaType: 'movie' }),
     );
