@@ -358,3 +358,37 @@ describe('perks', () => {
     });
   });
 });
+
+describe('always keep', () => {
+  it("keeps a service the list doesn't need, on its current plan, and counts it", () => {
+    const youtube = offering('youtube', [plan('Individual', 15.99), plan('Family', 26.99)]);
+    const result = optimizePlan({
+      subscriptions: [
+        { ...sub('youtube', 'active', 'Family', 2699), alwaysKeep: true },
+        sub('netflix', 'active', 'Standard', 1999),
+      ],
+      offerings: [youtube, NETFLIX],
+      shows: [],
+      preferences: DEFAULT_PREFERENCES,
+    });
+    const byKey = (key: string) => result.entries.find((e) => e.offering.key === key);
+    expect(byKey('youtube')).toMatchObject({
+      state: 'keep',
+      planChange: false,
+      plannedCostCents: 2699,
+    });
+    expect(byKey('netflix')?.state).toBe('pause');
+    expect(result.plannedCostCents).toBe(2699);
+  });
+
+  it('uses an always-kept service to cover titles before paying for another', () => {
+    const result = optimizePlan({
+      subscriptions: [{ ...sub('hulu', 'active', 'No ads', 2149), alwaysKeep: true }],
+      offerings: [HULU, NETFLIX],
+      // On Hulu or Netflix: Netflix with ads is cheaper, but Hulu is kept anyway.
+      shows: [show(['hulu', 'netflix'])],
+      preferences: DEFAULT_PREFERENCES,
+    });
+    expect(result.entries.map((e) => [e.offering.key, e.state])).toEqual([['hulu', 'keep']]);
+  });
+});

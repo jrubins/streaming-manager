@@ -7,11 +7,12 @@ import {
   type UpdateService,
 } from '@app/shared';
 import { cn } from 'cn';
-import { ExternalLink, Gift, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ExternalLink, Gift, MoreHorizontal, Pin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -178,7 +179,15 @@ function ServiceName({
         className={cn('size-10 rounded-xl', service.status === 'paused' && 'opacity-60 grayscale')}
       />
       <div className="min-w-0">
-        <p className="font-semibold">{service.name}</p>
+        <p className="flex flex-wrap items-center gap-x-2 font-semibold">
+          {service.name}
+          {service.alwaysKeep ? (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+              <Pin className="size-3" aria-hidden />
+              Always kept
+            </span>
+          ) : null}
+        </p>
         {service.includes.length > 1 ? (
           <p className="text-xs text-muted-foreground">
             {formatList(service.includes.map(providerName))}
@@ -334,6 +343,12 @@ function ServiceMenu({ service, onChange, onRemove, pending }: ServiceControlsPr
               {link.site ? `Manage on ${link.site}` : `Find how to manage ${service.name}`}
             </a>
           </DropdownMenuItem>
+          <DropdownMenuCheckboxItem
+            checked={service.alwaysKeep}
+            onCheckedChange={(alwaysKeep) => onChange({ alwaysKeep })}
+          >
+            Always keep
+          </DropdownMenuCheckboxItem>
           <DropdownMenuItem onSelect={() => setPerkOpen(true)}>
             <Gift aria-hidden />
             {service.perk ? 'Edit perk' : 'Comes with another plan…'}

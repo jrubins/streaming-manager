@@ -24,6 +24,7 @@ export function storyService(overrides: Partial<Service> & Pick<Service, 'id' | 
     priceSource: 'catalog',
     status: 'active',
     perk: null,
+    alwaysKeep: false,
     manageUrl: null,
     createdAt: created,
     ...overrides,

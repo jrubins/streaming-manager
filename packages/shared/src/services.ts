@@ -37,6 +37,8 @@ export const ServiceSchema = z.object({
   /** Set when it comes free or discounted with something else (an internet plan, say).
    * `monthlyPriceCents` stays the regular price, paid once the perk ends. */
   perk: ServicePerkSchema.nullable(),
+  /** Kept whatever the list needs: used for more than the list (YouTube videos, say). */
+  alwaysKeep: z.boolean(),
   /** The service's own page for pausing, cancelling or resuming, when known. */
   manageUrl: z.string().nullable(),
   createdAt: z.iso.datetime(),
@@ -59,6 +61,7 @@ export const UpdateServiceSchema = z
     planName: z.string().trim().min(1).max(100).nullable(),
     monthlyPriceCents: PriceCentsSchema.nullable(),
     perk: ServicePerkSchema.nullable(),
+    alwaysKeep: z.boolean(),
   })
   .partial();
 export type UpdateService = z.infer<typeof UpdateServiceSchema>;

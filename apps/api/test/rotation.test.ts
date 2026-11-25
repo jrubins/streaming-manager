@@ -82,6 +82,24 @@ describe('rotation plan', () => {
     });
   });
 
+  it('keeps a service marked always keep, even when the list does not need it', async () => {
+    const auth = await bearer(uniqueUserId());
+    const hulu = ServiceSchema.parse(await post(auth, '/services', { providerKey: 'hulu' }));
+    expect(entry(await plan(auth), 'hulu')?.state).toBe('pause');
+
+    const res = await request(app)
+      .patch(`/services/${hulu.id}`)
+      .set('Authorization', auth)
+      .send({ alwaysKeep: true })
+      .expect(200);
+    expect(ServiceSchema.parse(res.body).alwaysKeep).toBe(true);
+    expect(entry(await plan(auth), 'hulu')).toMatchObject({
+      state: 'keep',
+      plannedCostCents: 1249,
+      service: { alwaysKeep: true },
+    });
+  });
+
   it('follows the household preferences', async () => {
     const auth = await bearer(uniqueUserId());
     await post(auth, '/services', { providerKey: 'netflix', planName: 'Standard' });

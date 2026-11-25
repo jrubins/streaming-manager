@@ -78,6 +78,8 @@ model Service {
   perkVia           String?
   perkPriceCents    Int?
   perkEndsOn        String?
+  // Kept whatever the list needs: used for more than the list (YouTube videos, say).
+  alwaysKeep        Boolean            @default(false)
   createdAt         DateTime           @default(now()) @onCreate(now())
   updatedAt         temporal.UpdatedAt
 
