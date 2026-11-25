@@ -18,6 +18,7 @@ interface Choice<T> {
 /** One preference: a question and its choices, as a row of toggle buttons. */
 function ChoiceRow<T extends string | number | boolean>({
   title,
+  groupLabel = title,
   description,
   choices,
   value,
@@ -25,6 +26,8 @@ function ChoiceRow<T extends string | number | boolean>({
   pending,
 }: {
   title: string;
+  /** The choices' accessible name, when it must differ from the title. */
+  groupLabel?: string;
   description: ReactNode;
   choices: readonly Choice<T>[];
   value: T;
@@ -37,7 +40,11 @@ function ChoiceRow<T extends string | number | boolean>({
         <h3 className="font-medium">{title}</h3>
         <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
       </div>
-      <div role="group" aria-label={title} className="inline-flex shrink-0 rounded-lg bg-muted p-1">
+      <div
+        role="group"
+        aria-label={groupLabel}
+        className="inline-flex shrink-0 rounded-lg bg-muted p-1"
+      >
         {choices.map((choice) => (
           <button
             key={String(choice.value)}
@@ -67,6 +74,8 @@ export function PreferencesForm({ value, onChange, pending = false }: Preference
     <div className="divide-y">
       <ChoiceRow
         title="Ads"
+        // Ad blockers hide elements labelled "Ads", which hid these choices entirely.
+        groupLabel="Ad-supported plans"
         description="Ad-supported plans are often half the price."
         choices={[
           { value: true, label: 'Ads are fine' },

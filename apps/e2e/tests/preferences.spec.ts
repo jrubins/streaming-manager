@@ -8,7 +8,10 @@ test.describe('preferences page', () => {
     await page.getByRole('link', { name: 'Preferences', exact: true }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Preferences' })).toBeVisible();
 
-    await page.getByRole('group', { name: 'Ads' }).getByRole('button', { name: 'No ads' }).click();
+    await page
+      .getByRole('group', { name: 'Ad-supported plans' })
+      .getByRole('button', { name: 'No ads' })
+      .click();
     await expect(page.getByRole('status')).toHaveText(/Saved/);
     await page
       .getByRole('group', { name: 'Screens at once' })
