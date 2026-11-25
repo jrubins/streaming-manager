@@ -5,14 +5,17 @@ import { formatPrice } from '@/lib/format';
 
 interface PlanAlternativesProps {
   alternatives: readonly PlanAlternative[];
-  /** Titles the current plan leaves uncovered, to say when an option covers fewer. */
+  /** Titles and channels the current plan leaves uncovered, to say when an option covers
+   * fewer. */
   uncoveredCount: number;
   /** Switches the household's preferences to an alternative's. */
   onChoose: (preferences: UpdatePreferences) => void;
   pending?: boolean;
 }
 
-const fewer = (n: number) => (n === 1 ? '1 title fewer' : `${n} titles fewer`);
+// Titles and needed channels both count.
+const fewer = (n: number) =>
+  n === 1 ? '1 fewer title or channel' : `${n} fewer titles or channels`;
 
 /** The plan under other preferences: what each would cost and change. */
 export function PlanAlternatives({

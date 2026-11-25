@@ -34,6 +34,7 @@ test.describe('on a phone', () => {
     for (const [path, name] of [
       ['/', 'mobile-plan'],
       ['/services', 'mobile-services'],
+      ['/channels', 'mobile-channels'],
       ['/preferences', 'mobile-preferences'],
       ['/household', 'mobile-household'],
     ] as const) {
@@ -54,9 +55,10 @@ test.describe('on a phone', () => {
       await capture(name);
       await expectNoHorizontalScroll(page);
     }
-    await expect(
-      page.getByRole('button', { name: 'Add Disney+, Hulu & ESPN Select' }),
-    ).toBeInViewport();
+    // Scrolled to, a bundle's Add button is fully on screen (not cut off at the side).
+    const addBundle = page.getByRole('button', { name: 'Add Disney+, Hulu & ESPN Select' });
+    await addBundle.scrollIntoViewIfNeeded();
+    await expect(addBundle).toBeInViewport({ ratio: 1 });
 
     await page.goto('/watchlist');
     await page.getByLabel('Search for a show or movie').fill('harbor');

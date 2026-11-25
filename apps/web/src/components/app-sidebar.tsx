@@ -1,5 +1,13 @@
 import { Link } from '@tanstack/react-router';
-import { CalendarCheck, Clapperboard, LogOut, SlidersHorizontal, Tv, Users } from 'lucide-react';
+import {
+  CalendarCheck,
+  Clapperboard,
+  LogOut,
+  RadioTower,
+  SlidersHorizontal,
+  Tv,
+  Users,
+} from 'lucide-react';
 import { BrandMark } from '@/components/brand-mark';
 import {
   Sidebar,
@@ -29,6 +37,7 @@ export interface AppSidebarProps {
 const NAV = [
   { to: '/', label: 'Plan', icon: CalendarCheck },
   { to: '/watchlist', label: 'Watchlist', icon: Clapperboard },
+  { to: '/channels', label: 'Channels', icon: RadioTower },
   { to: '/services', label: 'Services', icon: Tv },
   { to: '/preferences', label: 'Preferences', icon: SlidersHorizontal },
   { to: '/household', label: 'Household', icon: Users },

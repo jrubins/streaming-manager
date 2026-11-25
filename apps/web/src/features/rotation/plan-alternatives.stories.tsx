@@ -38,7 +38,7 @@ export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('+$18.50/mo')).toBeInTheDocument();
-    await expect(canvas.getByText(/covers 1 title fewer/)).toBeInTheDocument();
+    await expect(canvas.getByText(/covers 1 fewer title or channel/)).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Use this option: No ads' }));
     await expect(args.onChoose).toHaveBeenCalledWith({ allowAds: false });
   },
