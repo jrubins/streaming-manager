@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'466da3a433a5c3bad1dbd6d48c66c132f63d186f8d7ded134f88c5d71fe9924e'>;
+  StorageHashBase<'8f553b5e33b5c1ed83e19b140ff3ea0efe71c80c2e742b982c83c41dbe76d781'>;
 export type ExecutionHash =
   ExecutionHashBase<'c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606'>;
 export type ProfileHash =
@@ -371,6 +371,7 @@ export namespace Models {
     readonly [RelationKeys]?: 'household';
   };
   export type public_Service = {
+    alwaysKeep: FieldOutputTypes['public']['Service']['alwaysKeep'];
     createdAt: FieldOutputTypes['public']['Service']['createdAt'];
     householdId: FieldOutputTypes['public']['Service']['householdId'];
     id: FieldOutputTypes['public']['Service']['id'];
@@ -622,6 +623,16 @@ type ContractBase = Omit<
             };
             readonly Service: {
               columns: {
+                readonly alwaysKeep: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
                 readonly createdAt: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-date@1';
@@ -1081,6 +1092,10 @@ type ContractBase = Omit<
           };
           readonly Service: {
             readonly fields: {
+              readonly alwaysKeep: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1164,6 +1179,7 @@ type ContractBase = Omit<
               readonly table: 'Service';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly alwaysKeep: { readonly column: 'alwaysKeep' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly householdId: { readonly column: 'householdId' };
                 readonly id: { readonly column: 'id' };

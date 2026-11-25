@@ -106,6 +106,9 @@ export interface OptimizerSubscription {
   /** A perk that applies now: it sets the price, and the plan stays as it is (switching
    * plans would lose the perk). */
   perk?: { monthlyPriceCents: number } | null;
+  /** Kept whatever the list needs (used for more than the list, like YouTube), on its
+   * current plan. */
+  alwaysKeep?: boolean;
 }
 
 export interface OptimizerShow {
@@ -201,7 +204,10 @@ export function optimizePlan<S extends OptimizerSubscription, W extends Optimize
     else needs.push(options);
   }
 
-  const chosen = chooseCandidates(candidates, needs);
+  const pinned = candidates.flatMap((candidate, index) =>
+    candidate.service?.alwaysKeep ? [index] : [],
+  );
+  const chosen = chooseCandidates(candidates, needs, pinned);
   // An active subscription that costs nothing (a free perk) is kept: pausing it saves nothing.
   candidates.forEach((candidate, index) => {
     if (candidate.service?.status === 'active' && candidate.cost === 0 && !candidate.planChange) {
@@ -323,7 +329,8 @@ function toCandidate<S extends OptimizerSubscription>(
   // Its current plan, if it qualifies: published features with the household's own price. A
   // plan we know nothing about (custom, or no published plans) is assumed to qualify.
   // A perk is kept whatever the preferences: the household already has it.
-  const currentQualifies = service.perk || !current ? true : planMeets(current, preferences);
+  const currentQualifies =
+    service.perk || service.alwaysKeep || !current ? true : planMeets(current, preferences);
   const currentCost = service.perk
     ? service.perk.monthlyPriceCents
     : (service.monthlyPriceCents ?? current?.monthlyPriceCents ?? null);
@@ -337,7 +344,7 @@ function toCandidate<S extends OptimizerSubscription>(
       }
     : null;
   const switchTo: Candidate<S> | null =
-    best && best.name !== service.planName && !service.perk
+    best && best.name !== service.planName && !service.perk && !service.alwaysKeep
       ? {
           ...base,
           plan: best,
@@ -369,7 +376,11 @@ const better = (a: Score, b: Score) =>
       ? a.changes < b.changes
       : a.count < b.count;
 
-function chooseCandidates<S>(candidates: readonly Candidate<S>[], needs: number[][]): Set<number> {
+function chooseCandidates<S>(
+  candidates: readonly Candidate<S>[],
+  needs: number[][],
+  pinned: readonly number[],
+): Set<number> {
   const costOf = (i: number) => candidates[i]?.cost ?? 0;
   const score = (set: readonly number[]): Score => {
     const inSet = new Set(set);
@@ -386,8 +397,8 @@ function chooseCandidates<S>(candidates: readonly Candidate<S>[], needs: number[
     return { cost, changes, count: set.length };
   };
 
-  // A title on exactly one candidate forces it into the plan.
-  const forced = [...new Set(needs.filter((need) => need.length === 1).flat())];
+  // Pinned candidates are in the plan, and so is a title's only candidate.
+  const forced = [...new Set([...pinned, ...needs.filter((need) => need.length === 1).flat()])];
   const open = needs.filter((need) => !need.some((i) => forced.includes(i)));
   const pool = [...new Set(open.flat())].sort((a, b) => a - b);
 

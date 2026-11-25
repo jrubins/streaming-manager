@@ -69,4 +69,27 @@ test.describe('services page', () => {
       '21.99',
     );
   });
+
+  test('always keeps a service the list does not need', async ({ page, api, capture }) => {
+    await api.post('/services', { data: { providerKey: 'hulu' } });
+    await page.goto('/');
+    await expect(page.getByRole('row', { name: /Hulu/ })).toContainText('Pause');
+
+    await page.getByRole('link', { name: 'Services', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Services' })).toBeVisible();
+    await page
+      .getByRole('table')
+      .getByRole('row', { name: /Hulu/ })
+      .getByRole('button', { name: 'Hulu actions' })
+      .click();
+    await page.getByRole('menuitemcheckbox', { name: 'Always keep' }).click();
+    await expect(page.getByRole('table').getByText('Always kept')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Plan', exact: true }).click();
+    const hulu = page.getByRole('row', { name: /Hulu/ });
+    await expect(hulu).toContainText('Always kept');
+    await expect(hulu).toContainText('Keep');
+    await page.waitForLoadState('networkidle');
+    await capture('plan-always-keep');
+  });
 });

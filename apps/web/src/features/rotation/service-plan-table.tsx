@@ -83,6 +83,11 @@ function explain(row: ServicePlanRow): string {
         : `${titles} and ${channelList}`;
   switch (kindOf(row)) {
     case 'keep':
+      if (service?.alwaysKeep) {
+        return shows.length === 0 && channels.length === 0
+          ? 'Always kept'
+          : `Always kept · also covers ${what}`;
+      }
       return `Needed for ${what}`;
     case 'switch': {
       const current = service?.monthlyPriceCents ?? null;

@@ -20,6 +20,7 @@ interface ServiceRow {
   perkVia: string | null;
   perkPriceCents: number | null;
   perkEndsOn: string | null;
+  alwaysKeep: boolean;
   createdAt: Date;
 }
 
@@ -54,6 +55,7 @@ export function createStreamingServicesService(
     priceSource: row.priceSource,
     status: row.status,
     perk: perkOf(row),
+    alwaysKeep: row.alwaysKeep,
     manageUrl: bundleByKey(row.providerKey)?.manageUrl ?? manageUrl(row.providerKey),
     createdAt: row.createdAt.toISOString(),
   });
@@ -123,6 +125,7 @@ export function createStreamingServicesService(
       const changes: Partial<Omit<ServiceRow, 'id' | 'createdAt'>> = {};
       if (input.status !== undefined) changes.status = input.status;
       if (input.perk !== undefined) Object.assign(changes, perkColumns(input.perk));
+      if (input.alwaysKeep !== undefined) changes.alwaysKeep = input.alwaysKeep;
       if (input.planName !== undefined) changes.planName = input.planName;
       if (input.monthlyPriceCents !== undefined) {
         changes.monthlyPriceCents = input.monthlyPriceCents;
