@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as HouseholdRouteImport } from './routes/household'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -18,6 +19,11 @@ import { Route as WatchlistRouteImport } from './routes/watchlist'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChannelsRoute = ChannelsRouteImport.update({
+  id: '/channels',
+  path: '/channels',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HouseholdRoute = HouseholdRouteImport.update({
@@ -43,6 +49,7 @@ const WatchlistRoute = WatchlistRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRoute
   '/household': typeof HouseholdRoute
   '/preferences': typeof PreferencesRoute
   '/services': typeof ServicesRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRoute
   '/household': typeof HouseholdRoute
   '/preferences': typeof PreferencesRoute
   '/services': typeof ServicesRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRoute
   '/household': typeof HouseholdRoute
   '/preferences': typeof PreferencesRoute
   '/services': typeof ServicesRoute
@@ -65,12 +74,25 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/household' | '/preferences' | '/services' | '/watchlist'
+  fullPaths:
+    | '/'
+    | '/channels'
+    | '/household'
+    | '/preferences'
+    | '/services'
+    | '/watchlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/household' | '/preferences' | '/services' | '/watchlist'
+  to:
+    | '/'
+    | '/channels'
+    | '/household'
+    | '/preferences'
+    | '/services'
+    | '/watchlist'
   id:
     | '__root__'
     | '/'
+    | '/channels'
     | '/household'
     | '/preferences'
     | '/services'
@@ -79,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChannelsRoute: typeof ChannelsRoute
   HouseholdRoute: typeof HouseholdRoute
   PreferencesRoute: typeof PreferencesRoute
   ServicesRoute: typeof ServicesRoute
@@ -92,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/channels': {
+      id: '/channels'
+      path: '/channels'
+      fullPath: '/channels'
+      preLoaderRoute: typeof ChannelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/household': {
@@ -127,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChannelsRoute: ChannelsRoute,
   HouseholdRoute: HouseholdRoute,
   PreferencesRoute: PreferencesRoute,
   ServicesRoute: ServicesRoute,

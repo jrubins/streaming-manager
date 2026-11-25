@@ -4,6 +4,7 @@ import type {
   Household,
   HouseholdMember,
   JoinHousehold,
+  HouseholdChannels,
   HouseholdMemberships,
   Preferences,
   UpdateHousehold,
@@ -11,6 +12,7 @@ import type {
 } from '@app/shared';
 import { isUniqueViolation } from '../../lib/db-errors.ts';
 import { HttpError, notFound } from '../../lib/http-error.ts';
+import { CHANNELS } from '../catalog/channel-catalog.ts';
 import { MEMBERSHIPS } from '../catalog/perk-catalog.ts';
 
 /** The household a user acts in: every other service scopes its data by `id`. */
@@ -173,6 +175,26 @@ export function createHouseholdService(db: Db) {
       const memberships = [...new Set(input.memberships)].sort();
       await Household.where({ id: member.householdId }).update({ memberships });
       return { memberships };
+    },
+
+    /** Keys of the live channels and league passes the household needs. */
+    async channels(userId: string): Promise<HouseholdChannels> {
+      const member = await membership(userId);
+      const household = await Household.where({ id: member.householdId }).first();
+      if (!household) throw notFound('Household not found');
+      return { channels: [...household.channels] };
+    },
+
+    async setChannels(userId: string, input: HouseholdChannels): Promise<HouseholdChannels> {
+      const known = new Set(CHANNELS.map((c) => c.key));
+      const unknown = input.channels.find((key) => !known.has(key));
+      if (unknown !== undefined) {
+        throw new HttpError(400, 'unknown_channel', `Unknown channel: ${unknown}`);
+      }
+      const member = await membership(userId);
+      const channels = [...new Set(input.channels)].sort();
+      await Household.where({ id: member.householdId }).update({ channels });
+      return { channels };
     },
 
     async updatePreferences(userId: string, input: UpdatePreferences): Promise<Preferences> {

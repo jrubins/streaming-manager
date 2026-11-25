@@ -1,6 +1,7 @@
 export * from './api.ts';
 export * from './auth.ts';
 export * from './catalog.ts';
+export * from './channels.ts';
 export * from './health.ts';
 export * from './household.ts';
 export * from './perks.ts';

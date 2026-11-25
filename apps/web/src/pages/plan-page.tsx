@@ -12,6 +12,7 @@ import { PlanSummary } from '@/features/rotation/plan-summary';
 import { rotationQueryOptions } from '@/features/rotation/queries';
 import { ServicePlanTable, type ServicePlanRow } from '@/features/rotation/service-plan-table';
 import { UncoveredShows } from '@/features/rotation/uncovered-shows';
+import { formatList } from '@/lib/format';
 import {
   providersQueryOptions,
   useCreateService,
@@ -144,21 +145,31 @@ export function PlanPage() {
           />
           <PlanAlternatives
             alternatives={plan.alternatives}
-            uncoveredCount={plan.uncovered.length}
+            uncoveredCount={plan.uncovered.length + plan.uncoveredChannels.length}
             pending={updatePreferences.isPending}
             onChoose={(preferences) => updatePreferences.mutate(preferences)}
           />
         </section>
       ) : null}
 
-      {plan.uncovered.length > 0 ? (
+      {plan.uncovered.length > 0 || plan.uncoveredChannels.length > 0 ? (
         <section aria-labelledby="plan-uncovered" className="mt-12">
           <SectionHeader
             id="plan-uncovered"
             title="Not covered"
             note="No plan that meets your preferences carries them"
           />
-          <UncoveredShows shows={plan.uncovered} providerName={providerName} />
+          {plan.uncovered.length > 0 ? (
+            <UncoveredShows shows={plan.uncovered} providerName={providerName} />
+          ) : null}
+          {plan.uncoveredChannels.length > 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Channels no service here carries: {formatList(plan.uncoveredChannels)}.{' '}
+              <Link to="/channels" className="font-medium text-primary hover:underline">
+                Change channels
+              </Link>
+            </p>
+          ) : null}
         </section>
       ) : null}
     </>

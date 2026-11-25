@@ -11,6 +11,10 @@ export function catalogRouter(catalog: CatalogService): Router {
     res.json(await catalog.providers(currentUserId(req)));
   });
 
+  router.get('/channels', async (req, res) => {
+    res.json(await catalog.channels(currentUserId(req)));
+  });
+
   router.get('/offers', async (req, res) => {
     res.json(await catalog.offers(currentUserId(req)));
   });

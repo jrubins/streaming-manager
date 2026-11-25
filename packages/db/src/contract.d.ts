@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'b3e22bcbaa098c4f05202bb2583419559af3b41070844c8f674186b1c61dbd2b'>;
+  StorageHashBase<'466da3a433a5c3bad1dbd6d48c66c132f63d186f8d7ded134f88c5d71fe9924e'>;
 export type ExecutionHash =
   ExecutionHashBase<'c9d21dc08aefbcaffa680670e308926db4fa7b7318ee1f77fe9dd1c5a5ff5606'>;
 export type ProfileHash =
@@ -345,6 +345,7 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
 export namespace Models {
   export type public_Household = {
     allowAds: FieldOutputTypes['public']['Household']['allowAds'];
+    channels: FieldOutputTypes['public']['Household']['channels'];
     createdAt: FieldOutputTypes['public']['Household']['createdAt'];
     id: FieldOutputTypes['public']['Household']['id'];
     inviteCode: FieldOutputTypes['public']['Household']['inviteCode'];
@@ -445,6 +446,16 @@ type ContractBase = Omit<
                     readonly value: DefaultLiteralValue<'pg/bool@1', true>;
                   };
                   readonly many: false;
+                };
+                readonly channels: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', readonly []>;
+                  };
+                  readonly many: { readonly elementNullable: false };
                 };
                 readonly createdAt: {
                   readonly dataType: 'pg/timestamptz';
@@ -906,6 +917,11 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
+              readonly channels: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: { readonly elementNullable: false };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1000,6 +1016,7 @@ type ContractBase = Omit<
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly allowAds: { readonly column: 'allowAds' };
+                readonly channels: { readonly column: 'channels' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly inviteCode: { readonly column: 'inviteCode' };

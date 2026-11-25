@@ -1,7 +1,9 @@
 import {
   AddToWatchlistSchema,
   CatalogProviderSchema,
+  ChannelCatalogSchema,
   CreateServiceSchema,
+  HouseholdChannelsSchema,
   HouseholdMembershipsSchema,
   OffersSchema,
   PreferencesSchema,
@@ -85,6 +87,39 @@ export function createMcpServer(services: McpServices, userId: string): McpServe
       outputSchema: PreferencesSchema,
     },
     async (input) => result(await services.households.updatePreferences(userId, input)),
+  );
+
+  server.registerTool(
+    'list_channels',
+    {
+      title: 'List channels',
+      description:
+        'Live TV channels and league passes (ESPN, MTV, local CBS, NFL Sunday Ticket…), the ' +
+        'services that carry each, and which ones the household needs. The plan covers each ' +
+        'needed channel with the cheapest service that carries it.',
+      outputSchema: ChannelCatalogSchema.extend({ householdChannels: z.string().array() }),
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      const [catalog, { channels }] = await Promise.all([
+        services.catalog.channels(userId),
+        services.households.channels(userId),
+      ]);
+      return result({ ...catalog, householdChannels: channels });
+    },
+  );
+
+  server.registerTool(
+    'set_channels',
+    {
+      title: 'Set needed channels',
+      description:
+        'Replace the list of live channels and league passes the household needs (keys from ' +
+        'list_channels).',
+      inputSchema: HouseholdChannelsSchema,
+      outputSchema: HouseholdChannelsSchema,
+    },
+    async (input) => result(await services.households.setChannels(userId, input)),
   );
 
   server.registerTool(

@@ -68,11 +68,22 @@ interface ServicePlanTableProps {
 }
 
 function explain(row: ServicePlanRow): string {
-  const { shows, coveredBy, service, plannedCostCents } = row;
+  const { shows, channels, coveredBy, service, plannedCostCents } = row;
+  // What it's needed for: titles on the list, and needed channels by name.
   const titles = shows.length === 1 ? '1 title' : `${shows.length} titles`;
+  const channelList =
+    channels.length <= 3
+      ? formatList(channels)
+      : `${channels.slice(0, 2).join(', ')} and ${channels.length - 2} more channels`;
+  const what =
+    channels.length === 0
+      ? `${titles} on your list`
+      : shows.length === 0
+        ? channelList
+        : `${titles} and ${channelList}`;
   switch (kindOf(row)) {
     case 'keep':
-      return `Needed for ${titles} on your list`;
+      return `Needed for ${what}`;
     case 'switch': {
       const current = service?.monthlyPriceCents ?? null;
       return current !== null && plannedCostCents !== null && plannedCostCents < current
@@ -80,12 +91,12 @@ function explain(row: ServicePlanRow): string {
         : 'To meet your preferences';
     }
     case 'resume':
-      return `${titles} waiting for it`;
+      return `${channels.length === 0 ? titles : what} waiting for it`;
     case 'subscribe':
-      return `Cheapest way to watch ${titles}`;
+      return `Cheapest way to get ${channels.length === 0 ? titles : what}`;
     case 'pause':
     case 'paused':
-      if (shows.length === 0) {
+      if (shows.length === 0 && channels.length === 0) {
         return row.state === 'pause'
           ? 'Nothing on your list streams here'
           : 'Nothing on your list needs it';

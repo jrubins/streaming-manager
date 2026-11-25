@@ -189,6 +189,7 @@ export function storyEntry(
     planChange: false,
     plannedCostCents: null,
     shows: [],
+    channels: [],
     ...rest,
   };
 }

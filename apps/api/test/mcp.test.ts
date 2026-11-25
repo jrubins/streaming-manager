@@ -53,6 +53,8 @@ describe('MCP endpoint', () => {
         'get_rotation_plan',
         'get_preferences',
         'update_preferences',
+        'list_channels',
+        'set_channels',
         'list_offers',
         'set_memberships',
         'list_watchlist',
@@ -107,6 +109,9 @@ describe('MCP endpoint', () => {
       arguments: { allowAds: false },
     });
     expect(PreferencesSchema.parse(prefs.structuredContent).allowAds).toBe(false);
+    await alice.callTool({ name: 'set_channels', arguments: { channels: ['mtv'] } });
+    const channels = await alice.callTool({ name: 'list_channels', arguments: {} });
+    expect(channels.structuredContent).toMatchObject({ householdChannels: ['mtv'] });
     await alice.callTool({ name: 'set_memberships', arguments: { memberships: ['xfinity'] } });
     const offers = await alice.callTool({ name: 'list_offers', arguments: {} });
     expect(offers.structuredContent).toMatchObject({ householdMemberships: ['xfinity'] });
