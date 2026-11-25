@@ -70,6 +70,16 @@ export interface BundleDefinition {
  */
 const US_BUNDLES: readonly BundleDefinition[] = [
   {
+    key: 'disney-hulu',
+    name: 'Disney+ & Hulu',
+    includes: ['disney-plus', 'hulu'],
+    plans: [
+      plan('Basic (with ads)', 12.99, { ads: true, streams: 2, uhd: false, downloads: false }),
+      plan('Premium', 21.99, { ads: false, streams: 2, uhd: false, downloads: true }),
+    ],
+    manageUrl: 'https://www.disneyplus.com/account',
+  },
+  {
     key: 'disney-hulu-espn-select',
     name: 'Disney+, Hulu & ESPN Select',
     includes: ['disney-plus', 'hulu', 'espn-plus'],
@@ -94,7 +104,10 @@ const US_BUNDLES: readonly BundleDefinition[] = [
     key: 'disney-hulu-max',
     name: 'Disney+, Hulu & HBO Max',
     includes: ['disney-plus', 'hulu', 'hbo-max'],
-    plans: [plan('With ads', 21.99, { ads: true, streams: 2, uhd: false, downloads: false })],
+    plans: [
+      plan('With ads', 21.99, { ads: true, streams: 2, uhd: false, downloads: false }),
+      plan('No ads', 34.99, { ads: false, streams: 2, uhd: false, downloads: true }),
+    ],
     manageUrl: 'https://www.disneyplus.com/account',
   },
 ];
