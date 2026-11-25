@@ -75,7 +75,7 @@ const US_BUNDLES: readonly BundleDefinition[] = [
     includes: ['disney-plus', 'hulu'],
     plans: [
       plan('Basic (with ads)', 12.99, { ads: true, streams: 2, uhd: false, downloads: false }),
-      plan('Premium', 26.99, { ads: false, streams: 2, uhd: false, downloads: true }),
+      plan('Premium', 21.99, { ads: false, streams: 2, uhd: false, downloads: true }),
     ],
     manageUrl: 'https://www.disneyplus.com/account',
   },
@@ -106,7 +106,7 @@ const US_BUNDLES: readonly BundleDefinition[] = [
     includes: ['disney-plus', 'hulu', 'hbo-max'],
     plans: [
       plan('With ads', 21.99, { ads: true, streams: 2, uhd: false, downloads: false }),
-      plan('No ads', 32.99, { ads: false, streams: 2, uhd: false, downloads: true }),
+      plan('No ads', 34.99, { ads: false, streams: 2, uhd: false, downloads: true }),
     ],
     manageUrl: 'https://www.disneyplus.com/account',
   },

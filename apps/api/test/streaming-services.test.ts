@@ -74,7 +74,7 @@ describe('bundles', () => {
       name: 'Disney+ & Hulu',
       includes: ['disney-plus', 'hulu'],
       planName: 'Premium',
-      monthlyPriceCents: 2699,
+      monthlyPriceCents: 2199,
     });
   });
 
@@ -111,7 +111,7 @@ describe('services API', () => {
     const auth = await asNewUser();
     expect(await addService(auth, { providerKey: 'netflix', planName: 'Premium' })).toMatchObject({
       planName: 'Premium',
-      monthlyPriceCents: 2699,
+      monthlyPriceCents: 2199,
       priceSource: 'catalog',
     });
     expect(
